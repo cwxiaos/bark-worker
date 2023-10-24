@@ -88,6 +88,21 @@ class Handler {
       }
     }
 
+    const deviceToken = await db.deviceTokenByKey(param_key)
+    if(await deviceToken != param_devicetoken){
+      if(isAllowNewDevice){
+        param_key = util.newShortUUID()
+        await db.saveDeviceTokenByKey(param_key, param_devicetoken)
+      }else{
+        Response_register = {
+          'message': "device registration failed: register disabled",
+          'code': 500,
+        }
+
+        return new Response(JSON.stringify(Response_register), {status: Response_register.code})
+      }
+    }
+
     Response_register = {
       'message': 'success',
       'code': 200,
@@ -154,8 +169,6 @@ class Handler {
     if(pathParts.length === 3){
       // Message only
       message = pathParts[2]
-
-
     }
 
     if(pathParts.length === 4){
@@ -164,7 +177,66 @@ class Handler {
       message = pathParts[3]
     }
 
-    return await apns.push(deviceToken, title, message, parameters)
+    const sound = parameters.get('sound')
+    var group = 'myNotificationCategory'
+    
+    if(parameters.get('group')){
+      group = parameters.get('group')
+    }
+    
+
+
+    let aps = {
+      'aps':{
+        'alert':{
+          'action': null,
+          'action-loc-key': null,
+          'body': decodeURIComponent(message),
+          'launch-image': null,
+          'loc-args': null,
+          'loc-key': null,
+          'title': decodeURIComponent(title),
+          'subtitle': null,
+          'title-loc-args': null,
+          'title-loc-key': null,
+          'summary-arg': null,
+          'summary-arg-count': null,
+        },
+        'badge': 0,
+        'category': group,
+        'content-available': null,
+        'interruption-level': null,
+        'mutable-content': 1,
+        'relevance-score': null,
+        'sound': {
+          'critical': 0,
+          'name': sound + '.caf',
+          'volume': 1.0,
+        },
+        'thread-id': null,
+        'url-args': null,
+      }
+    }
+
+    const response =  await apns.push(deviceToken, aps)
+
+    let Response_Push = {}
+
+    if(response.status === 200){
+      Response_Push = {
+        'message': 'success',
+        'code': 200,
+        'timestamp': util.getTimestamp(),
+      }
+    }else{
+      Response_Push = {
+        'message': 'push failed: ' + Object.values(JSON.parse(await response.text()))[0],
+        'code': response.status,
+        'timestamp': util.getTimestamp(),
+      }
+    }
+
+    return new Response(JSON.stringify(Response_Push), {status: Response_Push.code})
   }
 }
 
@@ -218,26 +290,16 @@ class APNs {
       if(authToken){
         return await authToken
       }
-      
       authToken = await generateAuthToken()
-
       await kvStorage.put('_authToken_', authToken,  {expirationTtl: 3000})
-
       return authToken
-
     }
 
-    this.push = async (deviceToken, title, message, parameters) => {
+    this.push = async (deviceToken, aps) => {
       const TOPIC = 'me.fin.bark'
       const APNS_HOST_NAME = 'api.push.apple.com'
       const AUTHENTICATION_TOKEN = await getAuthToken()
-      const pushData = JSON.stringify({
-        aps: {
-          alert: message,
-          'mutable-content': 1,
-        },
-        // Add other notification parameters as needed
-      })
+      const pushData = JSON.stringify(aps)
   
       const response = await fetch(`https://${APNS_HOST_NAME}/3/device/${deviceToken}`, {
         method: 'POST',
@@ -249,12 +311,8 @@ class APNs {
         },
         body: pushData,
       })
-  
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-      })
+
+      return response
     }
 
   }
@@ -311,12 +369,10 @@ class Util {
     const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     const length = 22 //Length of UUID
     let customUUID = ''
-
     for (let i = 0; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * characters.length)
       customUUID += characters[randomIndex]
     }
-
     return customUUID
   }
 }
