@@ -21,3 +21,5 @@ For Cloudflare Worker users, Create a new worker with KV, bind your KV to the ba
 ## TODO
 
 ### Add APIs like group, custome icon and some other features.
+
+## If you think this project is helpful to you, please Star it.
