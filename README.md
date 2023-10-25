@@ -4,13 +4,13 @@
 
 [Bark](https://github.com/Finb/Bark) is an iOS App which allows you to push customed notifications to your iPhone.
 
-## Setup
-
-**note: This is NOT a very stable and complete realise, And I will try to make it more reliable.**
+## Setup [[中文]](README.zh_CN.md)
 
 **This is a compable realise to bark-server, Some Features are still NOT availiable!!!**
 
-### A domain is Essential !!!
+**I'll try to make APIs are same to [[bark-server](https://github.com/Finb/bark-server)] as possible.**
+
+### ~~A domain is Essential !!!~~ Anyway, your domain Can be reached.
 
 For Cloudflare Worker users, Create a new worker with KV, bind your KV to the bark-worker as 'database'.
 
@@ -18,8 +18,18 @@ For Cloudflare Worker users, Create a new worker with KV, bind your KV to the ba
 
 <img src="doc/images/Screenshot from 2023-10-24 08-54-31.png">
 
+
+Here's where to bing KV:
+
+<img src="doc/images/Screenshot from 2023-10-25 22-05-51.png">
+
+If you want to block new registeration, modify code at here:
+
+<img src="doc/images/Screenshot from 2023-10-25 22-05-13.png">
+
 ## TODO
 
-### Add APIs like group, custome icon and some other features.
+### Add APIs like group, custome icon and some other features. And Cloudflare D1 Version is coming soon.
 
 ## If you think this project is helpful to you, please Star it.
+

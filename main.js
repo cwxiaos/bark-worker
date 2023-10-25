@@ -4,7 +4,8 @@ export default {
   }
 }
 
-const isAllowNewDevice = false
+// 这里决定是否允许新建设备
+const isAllowNewDevice = true
 
 async function handleRequest(request, env, ctx) {
   const {searchParams, pathname} = new URL(request.url)
@@ -203,7 +204,7 @@ class Handler {
           'summary-arg-count': null,
         },
         'badge': 0,
-        'category': group,
+        'category': 'myNotificationCategory',
         'content-available': null,
         'interruption-level': null,
         'mutable-content': 1,
@@ -213,7 +214,7 @@ class Handler {
           'name': sound + '.caf',
           'volume': 1.0,
         },
-        'thread-id': null,
+        'thread-id': group,
         'url-args': null,
       }
     }
