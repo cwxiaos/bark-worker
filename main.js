@@ -287,7 +287,7 @@ class APNs {
     }
 
     const getAuthToken = async () => {
-      let authToken = await kvStorage.get('authToken')
+      let authToken = await kvStorage.get('_authToken_')
       if(authToken){
         return await authToken
       }
