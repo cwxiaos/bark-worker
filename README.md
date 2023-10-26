@@ -4,7 +4,7 @@
 
 [Bark](https://github.com/Finb/Bark) is an iOS App which allows you to push customed notifications to your iPhone.
 
-## Setup [[中文]](README.zh_CN.md)
+## Setup [[中文]](README_zh.md)
 
 **This is a compable realise to bark-server, Some Features are still NOT availiable!!!**
 

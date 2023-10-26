@@ -6,13 +6,16 @@ export default {
 
 // 这里决定是否允许新建设备
 const isAllowNewDevice = true
+// 是否允许查询设备数量
+const isAllowQueryNums = false
 
 async function handleRequest(request, env, ctx) {
     const { searchParams, pathname } = new URL(request.url)
+    const handler = new Handler(env)
 
     switch (pathname) {
         case "/register": {
-            return handler.register(env, searchParams)
+            return handler.register(searchParams)
         }
         case "/ping": {
             return handler.ping(searchParams)
@@ -21,18 +24,17 @@ async function handleRequest(request, env, ctx) {
             return handler.healthz(searchParams)
         }
         case "/info": {
-            return handler.info(env, searchParams)
+            return handler.info(searchParams)
         }
         case "/debug/getClientInfo": {
             return new Response(JSON.stringify(request.cf))
         }
         default: {
             const pathParts = pathname.split('/')
-            const deviceKey = pathParts[1]
 
             // Check whether the URL is invalid
-            if (deviceKey.length === 22 && pathParts.length > 2 && pathParts.length < 5) {
-                return handler.push(env, pathParts, searchParams)
+            if (util.pathPartsCheck(pathParts)) {
+                return handler.push(pathParts, searchParams)
             }
 
             const Response_Access_Denied = {
@@ -49,199 +51,193 @@ async function handleRequest(request, env, ctx) {
  * Class Handler
  */
 class Handler {
-    constructor() {
+    constructor(env) {
         this.version = "v2.0.0"
-        this.build = "Oct 23 2023"
+        this.build = "Oct 26 2023"
         this.arch = "js"
         this.commit = "1"
-        this.devices = "0"
-    }
 
-    async register(env, parameters) {
         const db = new Database(env)
 
-        const param_devicetoken = parameters.get('devicetoken')
-        let param_key = parameters.get('key')
+        this.register = async (parameters) => {
 
-        let Response_register = {}
+            const param_devicetoken = parameters.get('devicetoken')
+            let param_key = parameters.get('key')
 
-        if (!param_devicetoken) {
+            let Response_register = {}
+
+            if (!param_devicetoken) {
+                Response_register = {
+                    'message': 'device token is empty',
+                    'code': 400,
+                    'timestamp': util.getTimestamp(),
+                }
+
+                return new Response(JSON.stringify(Response_register), { status: Response_register.code })
+            }
+
+            if (!param_key) {
+                if (isAllowNewDevice) {
+                    param_key = util.newShortUUID()
+                    await db.saveDeviceTokenByKey(param_key, param_devicetoken)
+                } else {
+                    Response_register = {
+                        'message': "device registration failed: register disabled",
+                        'code': 500,
+                    }
+
+                    return new Response(JSON.stringify(Response_register), { status: Response_register.code })
+                }
+            }
+
+            const deviceToken = await db.deviceTokenByKey(param_key)
+            if (await deviceToken != param_devicetoken) {
+                if (isAllowNewDevice) {
+                    param_key = util.newShortUUID()
+                    await db.saveDeviceTokenByKey(param_key, param_devicetoken)
+                } else {
+                    Response_register = {
+                        'message': "device registration failed: register disabled",
+                        'code': 500,
+                    }
+
+                    return new Response(JSON.stringify(Response_register), { status: Response_register.code })
+                }
+            }
+
             Response_register = {
-                'message': 'device token is empty',
-                'code': 400,
+                'message': 'success',
+                'code': 200,
                 'timestamp': util.getTimestamp(),
+                'data': {
+                    'key': param_key,
+                    'device_key': param_key,
+                    'device_token': param_devicetoken,
+                },
             }
 
             return new Response(JSON.stringify(Response_register), { status: Response_register.code })
         }
 
-        if (!param_key) {
-            if (isAllowNewDevice) {
-                param_key = util.newShortUUID()
-                await db.saveDeviceTokenByKey(param_key, param_devicetoken)
-            } else {
-                Response_register = {
-                    'message': "device registration failed: register disabled",
-                    'code': 500,
-                }
-
-                return new Response(JSON.stringify(Response_register), { status: Response_register.code })
-            }
-        }
-
-        const deviceToken = await db.deviceTokenByKey(param_key)
-        if (await deviceToken != param_devicetoken) {
-            if (isAllowNewDevice) {
-                param_key = util.newShortUUID()
-                await db.saveDeviceTokenByKey(param_key, param_devicetoken)
-            } else {
-                Response_register = {
-                    'message': "device registration failed: register disabled",
-                    'code': 500,
-                }
-
-                return new Response(JSON.stringify(Response_register), { status: Response_register.code })
-            }
-        }
-
-        Response_register = {
-            'message': 'success',
-            'code': 200,
-            'timestamp': util.getTimestamp(),
-            'data': {
-                'key': param_key,
-                'device_key': param_key,
-                'device_token': param_devicetoken,
-            },
-        }
-
-        return new Response(JSON.stringify(Response_register), { status: Response_register.code })
-    }
-
-    async ping(parameters) {
-        const Response_ping = {
-            'message': 'pong',
-            'code': 200,
-            'timestamp': util.getTimestamp(),
-        }
-
-        return new Response(JSON.stringify(Response_ping), { status: Response_ping.code })
-    }
-
-    async healthz(parameters) {
-        return new Response("ok")
-    }
-
-    async info(env, parameters) {
-        const db = new Database(env)
-
-        this.devices = await db.countAll()
-
-        const Response_info = {
-            'version': this.version,
-            'build': this.build,
-            'arch': this.arch,
-            'commit': this.commit,
-            'devices': this.devices,
-        }
-
-        return new Response(JSON.stringify(Response_info), { status: 200 })
-    }
-
-    async push(env, pathParts, parameters) {
-        const db = new Database(env)
-
-        const deviceToken = await db.deviceTokenByKey(pathParts[1])
-
-        if (!deviceToken) {
-            const Response_Access_Denied = {
-                'message': 'Access Denied',
-                'code': 500,
-                'timestamp': util.getTimestamp(),
-            }
-            return new Response(JSON.stringify(Response_Access_Denied), { status: Response_Access_Denied.code })
-        }
-
-        let title = ''
-        let message = ''
-
-        const apns = new APNs(env)
-
-        if (pathParts.length === 3) {
-            // Message only
-            message = pathParts[2]
-        }
-
-        if (pathParts.length === 4) {
-            // We have a title now
-            title = pathParts[2]
-            message = pathParts[3]
-        }
-
-        const sound = parameters.get('sound')
-        var group = 'myNotificationCategory'
-
-        if (parameters.get('group')) {
-            group = parameters.get('group')
-        }
-
-
-
-        let aps = {
-            'aps': {
-                'alert': {
-                    'action': null,
-                    'action-loc-key': null,
-                    'body': decodeURIComponent(message),
-                    'launch-image': null,
-                    'loc-args': null,
-                    'loc-key': null,
-                    'title': decodeURIComponent(title),
-                    'subtitle': null,
-                    'title-loc-args': null,
-                    'title-loc-key': null,
-                    'summary-arg': null,
-                    'summary-arg-count': null,
-                },
-                'badge': 0,
-                'category': 'myNotificationCategory',
-                'content-available': null,
-                'interruption-level': null,
-                'mutable-content': 1,
-                'relevance-score': null,
-                'sound': {
-                    'critical': 0,
-                    'name': sound + '.caf',
-                    'volume': 1.0,
-                },
-                'thread-id': group,
-                'url-args': null,
-            }
-        }
-
-        const response = await apns.push(deviceToken, aps)
-
-        let Response_Push = {}
-
-        if (response.status === 200) {
-            Response_Push = {
-                'message': 'success',
+        this.ping = async (parameters) => {
+            const Response_ping = {
+                'message': 'pong',
                 'code': 200,
                 'timestamp': util.getTimestamp(),
             }
-        } else {
-            Response_Push = {
-                'message': 'push failed: ' + Object.values(JSON.parse(await response.text()))[0],
-                'code': response.status,
-                'timestamp': util.getTimestamp(),
-            }
+
+            return new Response(JSON.stringify(Response_ping), { status: Response_ping.code })
         }
 
-        return new Response(JSON.stringify(Response_Push), { status: Response_Push.code })
+        this.healthz = async (parameters) => {
+            return new Response("ok")
+        }
+
+        this.info = async (parameters) => {
+            if (isAllowQueryNums) {
+                this.devices = await db.countAll()
+            }
+
+            const Response_info = {
+                'version': this.version,
+                'build': this.build,
+                'arch': this.arch,
+                'commit': this.commit,
+                'devices': this.devices,
+            }
+
+            return new Response(JSON.stringify(Response_info), { status: 200 })
+        }
+
+        this.push = async (pathParts, parameters) => {
+            const deviceToken = await db.deviceTokenByKey(pathParts[1])
+
+            if (!deviceToken) {
+                const Response_Access_Denied = {
+                    'message': 'Access Denied',
+                    'code': 500,
+                    'timestamp': util.getTimestamp(),
+                }
+                return new Response(JSON.stringify(Response_Access_Denied), { status: Response_Access_Denied.code })
+            }
+
+            let title
+            let message
+
+            if (pathParts.length === 3) {
+                // Message only
+                message = decodeURIComponent(pathParts[2])
+            }
+
+            if (pathParts.length === 4) {
+                // We have a title now
+                title = decodeURIComponent(pathParts[2])
+                message = decodeURIComponent(pathParts[3])
+            }
+
+            const sound = (parameters.get('sound') || '1107') + '.caf';
+            const group = parameters.get('group') || 'myNotificationCategory';
+            const isArchive = parameters.get('isArchive') || undefined;
+
+            let aps = {
+                'aps': {
+                    'alert': {
+                        'action': null,
+                        'action-loc-key': null,
+                        'body': message,
+                        'launch-image': null,
+                        'loc-args': null,
+                        'loc-key': null,
+                        'title': title,
+                        'subtitle': null,
+                        'title-loc-args': null,
+                        'title-loc-key': null,
+                        'summary-arg': null,
+                        'summary-arg-count': null,
+                    },
+                    'badge': 0,
+                    'category': 'myNotificationCategory',
+                    'content-available': null,
+                    'interruption-level': null,
+                    'mutable-content': 1,
+                    'relevance-score': null,
+                    'sound': {
+                        'critical': 0,
+                        'name': sound,
+                        'volume': 1.0,
+                    },
+                    'thread-id': group,
+                    'url-args': null,
+                    'isArchive': isArchive,
+                }
+            }
+
+            //return new Response(JSON.stringify(aps))
+
+            const apns = new APNs(env)
+
+            const response = await apns.push(deviceToken, aps)
+
+            let Response_Push = {}
+
+            if (response.status === 200) {
+                Response_Push = {
+                    'message': 'success',
+                    'code': 200,
+                    'timestamp': util.getTimestamp(),
+                }
+            } else {
+                Response_Push = {
+                    'message': 'push failed: ' + Object.values(JSON.parse(await response.text()))[0],
+                    'code': response.status,
+                    'timestamp': util.getTimestamp(),
+                }
+            }
+
+            return new Response(JSON.stringify(Response_Push), { status: Response_Push.code })
+        }
     }
 }
-
-const handler = new Handler()
 
 /**
  * Class APNs
@@ -344,9 +340,6 @@ class Database {
     }
 }
 
-// Require env to initialize
-// const database = new Database()
-
 /**
  * Class Util
  */
@@ -375,6 +368,10 @@ class Util {
                 customUUID += characters[randomIndex]
             }
             return customUUID
+        }
+
+        this.pathPartsCheck = (pathParts) => {
+            return (pathParts[1].length === 22) && ((pathParts.length === 3 && pathParts[2]) || (pathParts.length === 4 && pathParts[2] && pathParts[3]))
         }
     }
 }
