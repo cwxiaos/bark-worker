@@ -53,7 +53,7 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.0"
-        this.build = "Oct 26 2023"
+        this.build = "Oct 27 2023"
         this.arch = "js"
         this.commit = "1"
 
@@ -182,34 +182,36 @@ class Handler {
             let aps = {
                 'aps': {
                     'alert': {
-                        'action': null,
-                        'action-loc-key': null,
+                        'action': undefined,
+                        'action-loc-key': undefined,
                         'body': message,
-                        'launch-image': null,
-                        'loc-args': null,
-                        'loc-key': null,
+                        'launch-image': undefined,
+                        'loc-args': undefined,
+                        'loc-key': undefined,
                         'title': title,
-                        'subtitle': null,
-                        'title-loc-args': null,
-                        'title-loc-key': null,
-                        'summary-arg': null,
-                        'summary-arg-count': null,
+                        'subtitle': undefined,
+                        'title-loc-args': undefined,
+                        'title-loc-key': undefined,
+                        'summary-arg': undefined,
+                        'summary-arg-count': undefined,
+                        'isarchive': isArchive + '',
                     },
                     'badge': 0,
                     'category': 'myNotificationCategory',
-                    'content-available': null,
-                    'interruption-level': null,
+                    'content-available': undefined,
+                    'interruption-level': undefined,
                     'mutable-content': 1,
-                    'relevance-score': null,
+                    'relevance-score': undefined,
                     'sound': {
                         'critical': 0,
                         'name': sound,
                         'volume': 1.0,
                     },
                     'thread-id': group,
-                    'url-args': null,
-                    'isArchive': isArchive,
-                }
+                    'url-args': undefined,
+                },
+                // ExtParams
+                'isarchive': isArchive,
             }
 
             //return new Response(JSON.stringify(aps))
