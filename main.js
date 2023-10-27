@@ -53,7 +53,7 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.0"
-        this.build = "Oct 27 2023"
+        this.build = "Oct 26 2023"
         this.arch = "js"
         this.commit = "1"
 
@@ -175,9 +175,19 @@ class Handler {
                 message = decodeURIComponent(pathParts[3])
             }
 
-            const sound = (parameters.get('sound') || '1107') + '.caf';
-            const group = parameters.get('group') || 'myNotificationCategory';
-            const isArchive = parameters.get('isArchive') || undefined;
+            const sound = (parameters.get('sound') || '1107') + '.caf'
+            const group = parameters.get('group') || 'myNotificationCategory'
+
+            // ExtParams
+            const isArchive = parameters.get('isArchive') || undefined
+            const icon = parameters.get('icon') || undefined
+            const url = parameters.get('url') || undefined
+            const level = parameters.get('level') || undefined
+            const copy = parameters.get('copy') || undefined
+            const badge = parameters.get('badge') || undefined
+            const autoCopy = parameters.get('autoCopy') || undefined
+            const ciphertext = parameters.get('ciphertext') || undefined
+            
 
             let aps = {
                 'aps': {
@@ -194,7 +204,6 @@ class Handler {
                         'title-loc-key': undefined,
                         'summary-arg': undefined,
                         'summary-arg-count': undefined,
-                        'isarchive': isArchive + '',
                     },
                     'badge': 0,
                     'category': 'myNotificationCategory',
@@ -212,6 +221,13 @@ class Handler {
                 },
                 // ExtParams
                 'isarchive': isArchive,
+                'icon': icon,
+                'ciphertext': ciphertext,
+                'level': level,
+                'url': url,
+                'copy': copy,
+                'badge': badge, // Seems unnecessary
+                'autocopy': autoCopy,
             }
 
             //return new Response(JSON.stringify(aps))
