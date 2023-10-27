@@ -29,7 +29,7 @@ If you want to block new registeration, modify code at here:
 
 ## TODO
 
-### Add APIs like group, custome icon and some other features. And Cloudflare D1 Version is coming soon.
+### Cloudflare D1 Version ~~is coming soon~~.
 
 ## If you think this project is helpful to you, please Star it.
 
