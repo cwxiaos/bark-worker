@@ -5,7 +5,7 @@ export default {
 }
 
 // 这里决定是否允许新建设备
-const isAllowNewDevice = true
+const isAllowNewDevice = false
 // 是否允许查询设备数量
 const isAllowQueryNums = false
 
@@ -26,8 +26,18 @@ async function handleRequest(request, env, ctx) {
         case "/info": {
             return handler.info(searchParams)
         }
-        case "/debug/getClientInfo": {
-            return new Response(JSON.stringify(request.cf))
+        case "/push": {
+            let requestBody
+            try{
+                requestBody = await request.json()
+            }catch(err){
+                return util.responseAccessDenied()
+            }
+            if (util.requestBodyCheck(requestBody)) {
+                return handler.push(undefined, requestBody)
+            }
+
+            return util.responseAccessDenied()
         }
         default: {
             const pathParts = pathname.split('/')
@@ -36,13 +46,8 @@ async function handleRequest(request, env, ctx) {
             if (util.pathPartsCheck(pathParts)) {
                 return handler.push(pathParts, searchParams)
             }
-
-            const Response_Access_Denied = {
-                'message': 'Access Denied',
-                'code': 500,
-                'timestamp': util.getTimestamp(),
-            }
-            return new Response(JSON.stringify(Response_Access_Denied), { status: Response_Access_Denied.code })
+            
+            return util.responseAccessDenied()
         }
     }
 }
@@ -64,16 +69,16 @@ class Handler {
             const param_devicetoken = parameters.get('devicetoken')
             let param_key = parameters.get('key')
 
-            let Response_register = {}
+            let Response_Register = {}
 
             if (!param_devicetoken) {
-                Response_register = {
+                Response_Register = {
                     'message': 'device token is empty',
                     'code': 400,
                     'timestamp': util.getTimestamp(),
                 }
 
-                return new Response(JSON.stringify(Response_register), { status: Response_register.code })
+                return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
             }
 
             if (!param_key) {
@@ -81,12 +86,12 @@ class Handler {
                     param_key = util.newShortUUID()
                     await db.saveDeviceTokenByKey(param_key, param_devicetoken)
                 } else {
-                    Response_register = {
+                    Response_Register = {
                         'message': "device registration failed: register disabled",
                         'code': 500,
                     }
 
-                    return new Response(JSON.stringify(Response_register), { status: Response_register.code })
+                    return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
                 }
             }
 
@@ -96,16 +101,16 @@ class Handler {
                     param_key = util.newShortUUID()
                     await db.saveDeviceTokenByKey(param_key, param_devicetoken)
                 } else {
-                    Response_register = {
+                    Response_Register = {
                         'message': "device registration failed: register disabled",
                         'code': 500,
                     }
 
-                    return new Response(JSON.stringify(Response_register), { status: Response_register.code })
+                    return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
                 }
             }
 
-            Response_register = {
+            Response_Register = {
                 'message': 'success',
                 'code': 200,
                 'timestamp': util.getTimestamp(),
@@ -116,7 +121,7 @@ class Handler {
                 },
             }
 
-            return new Response(JSON.stringify(Response_register), { status: Response_register.code })
+            return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
         }
 
         this.ping = async (parameters) => {
@@ -150,11 +155,17 @@ class Handler {
         }
 
         this.push = async (pathParts, parameters) => {
-            const deviceToken = await db.deviceTokenByKey(pathParts[1])
+            let deviceToken
+
+            if (pathParts) {
+                deviceToken = await db.deviceTokenByKey(pathParts[1])
+            } else {
+                deviceToken = await db.deviceTokenByKey(parameters.device_key)
+            }
 
             if (!deviceToken) {
                 const Response_Access_Denied = {
-                    'message': 'Access Denied',
+                    'message': 'Access Denied: Invalid Key',
                     'code': 500,
                     'timestamp': util.getTimestamp(),
                 }
@@ -164,30 +175,44 @@ class Handler {
             let title
             let message
 
-            if (pathParts.length === 3) {
-                // Message only
-                message = decodeURIComponent(pathParts[2])
+            let requestBody = {}
+
+            if (pathParts) {
+                if (pathParts.length === 3) {
+                    // Message only
+                    message = decodeURIComponent(pathParts[2])
+                }
+
+                if (pathParts.length === 4) {
+                    // We have a title now
+                    title = decodeURIComponent(pathParts[2])
+                    message = decodeURIComponent(pathParts[3])
+                }
+
+                parameters.forEach((value, key) => { requestBody[key] = value })
+            }else{
+                requestBody = parameters
+
+                title = requestBody.title || undefined
+                message = requestBody.body || undefined
             }
 
-            if (pathParts.length === 4) {
-                // We have a title now
-                title = decodeURIComponent(pathParts[2])
-                message = decodeURIComponent(pathParts[3])
+            let sound = requestBody.sound || '1107'
+            if (!sound.endsWith('.caf')) {
+                sound += '.caf'
             }
+            const category = requestBody.category || undefined
+            const group = requestBody.group || 'myNotificationCategory'
 
-            const sound = (parameters.get('sound') || '1107') + '.caf'
-            const group = parameters.get('group') || 'myNotificationCategory'
+            const isArchive = requestBody.isArchive || undefined
+            const icon = requestBody.icon || undefined
+            const url = requestBody.url || undefined
+            const level = requestBody.level || undefined
+            const copy = requestBody.copy || undefined
+            const badge = requestBody.badge || 0
+            const autoCopy = requestBody.autoCopy || undefined
+            const ciphertext = requestBody.ciphertext || undefined
 
-            // ExtParams
-            const isArchive = parameters.get('isArchive') || undefined
-            const icon = parameters.get('icon') || undefined
-            const url = parameters.get('url') || undefined
-            const level = parameters.get('level') || undefined
-            const copy = parameters.get('copy') || undefined
-            const badge = parameters.get('badge') || undefined
-            const autoCopy = parameters.get('autoCopy') || undefined
-            const ciphertext = parameters.get('ciphertext') || undefined
-            
 
             let aps = {
                 'aps': {
@@ -205,8 +230,8 @@ class Handler {
                         'summary-arg': undefined,
                         'summary-arg-count': undefined,
                     },
-                    'badge': 0,
-                    'category': 'myNotificationCategory',
+                    'badge': badge,
+                    'category': category,
                     'content-available': undefined,
                     'interruption-level': undefined,
                     'mutable-content': 1,
@@ -226,11 +251,10 @@ class Handler {
                 'level': level,
                 'url': url,
                 'copy': copy,
-                'badge': badge, // Seems unnecessary
                 'autocopy': autoCopy,
             }
 
-            //return new Response(JSON.stringify(aps))
+            // return new Response(JSON.stringify(aps))
 
             const apns = new APNs(env)
 
@@ -390,6 +414,19 @@ class Util {
 
         this.pathPartsCheck = (pathParts) => {
             return (pathParts[1].length === 22) && ((pathParts.length === 3 && pathParts[2]) || (pathParts.length === 4 && pathParts[2] && pathParts[3]))
+        }
+
+        this.requestBodyCheck = (requestBody) => {
+            return (requestBody.device_key.length === 22)
+        }
+
+        this.responseAccessDenied = () => {
+            const Response_Invalid_Access = {
+                'message': 'Access Denied',
+                'code': 500,
+                'timestamp': util.getTimestamp(),
+            }
+            return new Response(JSON.stringify(Response_Invalid_Access), { status: Response_Invalid_Access.code });
         }
     }
 }
