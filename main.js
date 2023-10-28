@@ -201,8 +201,8 @@ class Handler {
             if (!sound.endsWith('.caf')) {
                 sound += '.caf'
             }
-            const category = requestBody.category || undefined
-            const group = requestBody.group || 'myNotificationCategory'
+            const category = requestBody.category || 'myNotificationCategory'
+            const group = requestBody.group || 'Default'
 
             const isArchive = requestBody.isArchive || undefined
             const icon = requestBody.icon || undefined
@@ -251,7 +251,7 @@ class Handler {
                 'level': level,
                 'url': url,
                 'copy': copy,
-                'badge': badge, // ？？？
+                'badge': badge,
                 'autocopy': autoCopy,
             }
 
