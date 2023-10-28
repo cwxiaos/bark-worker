@@ -230,7 +230,7 @@ class Handler {
                         'summary-arg': undefined,
                         'summary-arg-count': undefined,
                     },
-                    'badge': badge,
+                    'badge': 0,
                     'category': category,
                     'content-available': undefined,
                     'interruption-level': undefined,
@@ -251,6 +251,7 @@ class Handler {
                 'level': level,
                 'url': url,
                 'copy': copy,
+                'badge': badge, // ？？？
                 'autocopy': autoCopy,
             }
 

@@ -1,6 +1,6 @@
 ## Setup
 
-**这是一个bark-server的兼容实现, 一些特性还不可用!!!**
+**这是一个bark-server的兼容实现, ~~一些特性还不可用~~!!! (目前基本测试OK,有Bug请提Issue)**
 
 **我会尽量保持API和[[bark-server](https://github.com/Finb/bark-server)]一致**
 
@@ -23,6 +23,6 @@
 
 ## TODO
 
-### Cloudflare D1版本.
+### Cloudflare D1版本即将推出.
 
 ## 如果您认为此项目对您有帮助,请Star!
