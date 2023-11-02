@@ -29,7 +29,10 @@ If you want to block new registeration, modify code at here:
 
 ## TODO
 
-### Cloudflare D1 Version is coming soon.
+### ~~Cloudflare D1 Version is coming soon.~~
+By considering the free usage of worker,D1 Version maybe meaningless, And The query of D1 is more complicated than a local sql,So D1 version will not be availiable in a short range.
+
+### Not import third party library.
 
 ## If you think this project is helpful to you, please Star it.
 
