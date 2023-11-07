@@ -23,6 +23,14 @@
 
 ## TODO
 
+### !12月25日前暂停更新!
+已知BUG
+
+- ciphertext在V1 API下无法使用
+- 在使用V2 API 情况下无法通过V1 API传key
+- register逻辑优化
+- ...
+
 ### ~~Cloudflare D1版本即将推出.~~
 
 D1版本暂时不会出,由于Worker免费额度是100000/day,同时KV免费读取次数也是100000/day; D1数据库的一些Query存在比较复杂的情况,我还要研究一下;使用D1的情况下要么使用KV存authToken(意义不大),要么用D1存(需要额外建表同时还要考虑Duration),同时Worker的免费额度对于少量用户完全够用,D1版本对Cloudlfare付费用户才有意义(人数少也没意义),所以D1短时间内不会搞.

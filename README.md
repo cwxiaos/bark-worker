@@ -29,6 +29,8 @@ If you want to block new registeration, modify code at here:
 
 ## TODO
 
+### !This project will resume after Dec 24 2023!
+
 ### ~~Cloudflare D1 Version is coming soon.~~
 By considering the free usage of worker,D1 Version maybe meaningless, And The query of D1 is more complicated than a local sql,So D1 version will not be availiable in a short range.
 
