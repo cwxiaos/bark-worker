@@ -30,6 +30,7 @@
 - 在使用V2 API 情况下无法通过V1 API传key
 - register逻辑优化
 - ...
+- 许多坑
 
 ### ~~Cloudflare D1版本即将推出.~~
 
