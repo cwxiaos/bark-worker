@@ -1,4 +1,8 @@
-# Bark
+# Bark Server On Cloudflare Worker
+
+This is a Bark Server On Cloudflare Worker.
+
+## What is Bark
 
 <img src="https://wx3.sinaimg.cn/mw690/0060lm7Tly1g0nfnjjxbbj30sg0sg757.jpg" width=200px height=200px />
 
@@ -6,11 +10,7 @@
 
 ## Setup [[中文]](README_zh.md)
 
-**This is a compable realise to bark-server, Some Features are still NOT availiable!!!**
-
-**I'll try to make APIs are same to [[bark-server](https://github.com/Finb/bark-server)] as possible.**
-
-### ~~A domain is Essential !!!~~ Anyway, your domain Can be reached.
+### An availiable domian.
 
 For Cloudflare Worker users, Create a new worker with KV, bind your KV to the bark-worker as 'database'.
 
@@ -26,15 +26,6 @@ Here's where to bing KV:
 If you want to block new registeration, modify code at here:
 
 <img src="doc/images/Screenshot from 2023-10-25 22-05-13.png">
-
-## TODO
-
-### !This project will resume after Dec 24 2023!
-
-### ~~Cloudflare D1 Version is coming soon.~~
-By considering the free usage of worker,D1 Version maybe meaningless, And The query of D1 is more complicated than a local sql,So D1 version will not be availiable in a short range.
-
-### Not import third party library.
 
 ## If you think this project is helpful to you, please Star it.
 

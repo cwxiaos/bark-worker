@@ -27,27 +27,55 @@ async function handleRequest(request, env, ctx) {
             return handler.info(searchParams)
         }
         case "/push": {
-            let requestBody
+            let requestBody = {}
             try{
                 requestBody = await request.json()
             }catch(err){
-                return util.responseAccessDenied()
-            }
-            if (util.requestBodyCheck(requestBody)) {
-                return handler.push(undefined, requestBody)
+                return new Response(JSON.stringify({
+                    'code': 400,
+                    'message': 'request bind failed: ' + err,
+                    'timestamp': util.getTimestamp()
+                }), { status: 400 })
             }
 
-            return util.responseAccessDenied()
+            return handler.push(requestBody)
         }
         default: {
             const pathParts = pathname.split('/')
+            let requestBody = {}
 
-            // Check whether the URL is invalid
-            if (util.pathPartsCheck(pathParts)) {
-                return handler.push(pathParts, searchParams)
+            if (pathParts[1]) {
+                const contentType = request.headers.get('content-type')
+                if(contentType && contentType.includes('application/json')){
+                    try{
+                        requestBody = await request.json()
+                    }catch(err){
+                        return new Response(JSON.stringify({
+                            'code': 400,
+                            'message': 'request bind failed: ' + err,
+                            'timestamp': util.getTimestamp()
+                        }), { status: 400 })
+                    }
+                }else{
+                    searchParams.forEach((value, key) => {requestBody[key] = value})
+                    if(pathParts.length === 3){
+                        requestBody.body = pathParts[2]
+                    }else{
+                        requestBody.title = pathParts[2]
+                        requestBody.body = pathParts[3]
+                    }
+                }
+
+                requestBody.device_key = pathParts[1]
+
+                return handler.push(requestBody)
             }
-            
-            return util.responseAccessDenied()
+
+            return new Response(JSON.stringify({
+                'code': 404,
+                'message': 'Cannot ' + request.method + ' ' + pathname,
+                'timestamp': util.getTimestamp()
+            }), { status: 404 })
         }
     }
 }
@@ -58,9 +86,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.0"
-        this.build = "Oct 26 2023"
+        this.build = "2024-02-05 15:58:11"
         this.arch = "js"
-        this.commit = "1"
+        this.commit = "8769127a2fcb0cab1cdceb187aa43cc10eefa987"
 
         const db = new Database(env)
 
@@ -69,16 +97,12 @@ class Handler {
             const param_devicetoken = parameters.get('devicetoken')
             let param_key = parameters.get('key')
 
-            let Response_Register = {}
-
             if (!param_devicetoken) {
-                Response_Register = {
+                return new Response(JSON.stringify({
                     'message': 'device token is empty',
                     'code': 400,
                     'timestamp': util.getTimestamp(),
-                }
-
-                return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
+                }), { status: 400 })
             }
 
             if (!param_key) {
@@ -86,12 +110,10 @@ class Handler {
                     param_key = util.newShortUUID()
                     await db.saveDeviceTokenByKey(param_key, param_devicetoken)
                 } else {
-                    Response_Register = {
+                    return new Response(JSON.stringify({
                         'message': "device registration failed: register disabled",
                         'code': 500,
-                    }
-
-                    return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
+                    }), { status: 500 })
                 }
             }
 
@@ -101,16 +123,14 @@ class Handler {
                     param_key = util.newShortUUID()
                     await db.saveDeviceTokenByKey(param_key, param_devicetoken)
                 } else {
-                    Response_Register = {
+                    return new Response(JSON.stringify({
                         'message': "device registration failed: register disabled",
                         'code': 500,
-                    }
-
-                    return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
+                    }), { status: 500 })
                 }
             }
 
-            Response_Register = {
+            return new Response(JSON.stringify({
                 'message': 'success',
                 'code': 200,
                 'timestamp': util.getTimestamp(),
@@ -119,19 +139,15 @@ class Handler {
                     'device_key': param_key,
                     'device_token': param_devicetoken,
                 },
-            }
-
-            return new Response(JSON.stringify(Response_Register), { status: Response_Register.code })
+            }), { status: 200 })
         }
 
         this.ping = async (parameters) => {
-            const Response_ping = {
+            return new Response(JSON.stringify({
                 'message': 'pong',
                 'code': 200,
                 'timestamp': util.getTimestamp(),
-            }
-
-            return new Response(JSON.stringify(Response_ping), { status: Response_ping.code })
+            }), { status: 200 })
         }
 
         this.healthz = async (parameters) => {
@@ -143,83 +159,52 @@ class Handler {
                 this.devices = await db.countAll()
             }
 
-            const Response_info = {
+            return new Response(JSON.stringify({
                 'version': this.version,
                 'build': this.build,
                 'arch': this.arch,
                 'commit': this.commit,
                 'devices': this.devices,
-            }
-
-            return new Response(JSON.stringify(Response_info), { status: 200 })
+            }), { status: 200 })
         }
 
-        this.push = async (pathParts, parameters) => {
-            let deviceToken
-
-            if (pathParts) {
-                deviceToken = await db.deviceTokenByKey(pathParts[1])
-            } else {
-                deviceToken = await db.deviceTokenByKey(parameters.device_key)
-            }
+        this.push = async (parameters) => {
+            // return new Response(JSON.stringify(parameters))
+            const deviceToken = await db.deviceTokenByKey(parameters.device_key)
 
             if (!deviceToken) {
-                const Response_Access_Denied = {
+                return new Response(JSON.stringify({
                     'message': 'Access Denied: Invalid Key',
                     'code': 500,
                     'timestamp': util.getTimestamp(),
-                }
-                return new Response(JSON.stringify(Response_Access_Denied), { status: Response_Access_Denied.code })
+                }), { status: 500 })
             }
 
-            let title
-            let message
+            const title = parameters.title || undefined
+            const body = parameters.body || "NoContent"
 
-            let requestBody = {}
-
-            if (pathParts) {
-                if (pathParts.length === 3) {
-                    // Message only
-                    message = decodeURIComponent(pathParts[2])
-                }
-
-                if (pathParts.length === 4) {
-                    // We have a title now
-                    title = decodeURIComponent(pathParts[2])
-                    message = decodeURIComponent(pathParts[3])
-                }
-
-                parameters.forEach((value, key) => { requestBody[key] = value })
-            }else{
-                requestBody = parameters
-
-                title = requestBody.title || undefined
-                message = requestBody.body || undefined
-            }
-
-            let sound = requestBody.sound || '1107'
+            let sound = parameters.sound || '1107'
             if (!sound.endsWith('.caf')) {
                 sound += '.caf'
             }
-            const category = requestBody.category || 'myNotificationCategory'
-            const group = requestBody.group || 'Default'
+            const category = parameters.category || 'myNotificationCategory'
+            const group = parameters.group || 'Default'
 
-            const isArchive = requestBody.isArchive || undefined
-            const icon = requestBody.icon || undefined
-            const url = requestBody.url || undefined
-            const level = requestBody.level || undefined
-            const copy = requestBody.copy || undefined
-            const badge = requestBody.badge || 0
-            const autoCopy = requestBody.autoCopy || undefined
-            const ciphertext = requestBody.ciphertext || undefined
-
+            const isArchive = parameters.isArchive || undefined
+            const icon = parameters.icon || undefined
+            const url = parameters.url || undefined
+            const level = parameters.level || undefined
+            const copy = parameters.copy || undefined
+            const badge = parameters.badge || 0
+            const autoCopy = parameters.autoCopy || undefined
+            const ciphertext = parameters.ciphertext || undefined
 
             let aps = {
                 'aps': {
                     'alert': {
                         'action': undefined,
                         'action-loc-key': undefined,
-                        'body': message,
+                        'body': body,
                         'launch-image': undefined,
                         'loc-args': undefined,
                         'loc-key': undefined,
@@ -254,30 +239,25 @@ class Handler {
                 'badge': badge,
                 'autocopy': autoCopy,
             }
-
             // return new Response(JSON.stringify(aps))
 
             const apns = new APNs(env)
 
             const response = await apns.push(deviceToken, aps)
 
-            let Response_Push = {}
-
             if (response.status === 200) {
-                Response_Push = {
+                return new Response(JSON.stringify({
                     'message': 'success',
                     'code': 200,
                     'timestamp': util.getTimestamp(),
-                }
+                }), { status: 200 })
             } else {
-                Response_Push = {
+                return new Response(JSON.stringify({
                     'message': 'push failed: ' + Object.values(JSON.parse(await response.text()))[0],
                     'code': response.status,
                     'timestamp': util.getTimestamp(),
-                }
+                }), { status: response.status })
             }
-
-            return new Response(JSON.stringify(Response_Push), { status: Response_Push.code })
         }
     }
 }
@@ -411,23 +391,6 @@ class Util {
                 customUUID += characters[randomIndex]
             }
             return customUUID
-        }
-
-        this.pathPartsCheck = (pathParts) => {
-            return (pathParts[1].length === 22) && ((pathParts.length === 3 && pathParts[2]) || (pathParts.length === 4 && pathParts[2] && pathParts[3]))
-        }
-
-        this.requestBodyCheck = (requestBody) => {
-            return (requestBody.device_key.length === 22)
-        }
-
-        this.responseAccessDenied = () => {
-            const Response_Invalid_Access = {
-                'message': 'Access Denied',
-                'code': 500,
-                'timestamp': util.getTimestamp(),
-            }
-            return new Response(JSON.stringify(Response_Invalid_Access), { status: Response_Invalid_Access.code });
         }
     }
 }
