@@ -59,10 +59,10 @@ async function handleRequest(request, env, ctx) {
                 }else{
                     searchParams.forEach((value, key) => {requestBody[key] = value})
                     if(pathParts.length === 3){
-                        requestBody.body = pathParts[2]
+                        requestBody.body = decodeURIComponent(pathParts[2])
                     }else{
-                        requestBody.title = pathParts[2]
-                        requestBody.body = pathParts[3]
+                        requestBody.title = decodeURIComponent(pathParts[2])
+                        requestBody.body = decodeURIComponent(pathParts[3])
                     }
                 }
 
@@ -85,10 +85,10 @@ async function handleRequest(request, env, ctx) {
  */
 class Handler {
     constructor(env) {
-        this.version = "v2.0.0"
-        this.build = "2024-02-05 15:58:11"
+        this.version = "v2.0.1"
+        this.build = "2024-02-06 14:08:20"
         this.arch = "js"
-        this.commit = "8769127a2fcb0cab1cdceb187aa43cc10eefa987"
+        this.commit = "711ac02b912971634f052dc7543c78b922dcae36"
 
         const db = new Database(env)
 
