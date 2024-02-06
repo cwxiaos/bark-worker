@@ -15,7 +15,23 @@ curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY" \
      -H 'Content-Type: application/json; charset=utf-8' \
      -d $'{
   "body": "Test Message In Body",
-  "device_key": "$BAD_DEVICE_KEY",
+  "device_key": "'$BAD_DEVICE_KEY'",
+  "title": "Test Title In Body",
+  "badge": 1,
+  "category": "myNotificationCategory",
+  "icon": "https://day.app/assets/images/avatar.jpg",
+  "group": "test",
+  "url": "https://mritd.com",
+  "isArchive": 0
+}'
+
+echo ""
+
+curl -X "POST" "$SERVER_ADDRESS/push" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "body": "Test Message In Body",
+  "device_key": "'$DEVICE_KEY'",
   "title": "Test Title In Body",
   "badge": 1,
   "category": "myNotificationCategory",
@@ -39,6 +55,12 @@ curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_MESSAGE?isArchive=0"
 echo ""
 curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_TITLE/$ENCODED_MESSAGE?isArchive=0"
 
+# echo ""
+# echo "---------------------------------------------------------------------"
+# echo "Test URL/KEY With Message In Form"
+# echo "---------------------------------------------------------------------"
+# echo ""
+
 echo ""
 echo "---------------------------------------------------------------------"
 echo "Test ciphertext"
@@ -46,7 +68,7 @@ echo "---------------------------------------------------------------------"
 echo ""
 
 set -e
-json='{"body": "test", "sound": "birdsong", "isArchive": 0}'
+json='{"body": "test", "sound": "birdsong"}'
 
 key='1234567890123456'
 iv='1111111111111111'

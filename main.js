@@ -26,50 +26,41 @@ async function handleRequest(request, env, ctx) {
         case "/info": {
             return handler.info(searchParams)
         }
-        case "/push": {
-            let requestBody = {}
-            try{
-                requestBody = await request.json()
-            }catch(err){
-                return new Response(JSON.stringify({
-                    'code': 400,
-                    'message': `request bind failed: ${err}`,
-                    'timestamp': util.getTimestamp()
-                }), { status: 400 })
-            }
-
-            return handler.push(requestBody)
-        }
         default: {
             const pathParts = pathname.split('/')
-            let requestBody = {}
 
-            if (pathParts[1]) {
+            if(pathParts[1]){
                 const contentType = request.headers.get('content-type')
-                if(contentType && contentType.includes('application/json')){
-                    try{
+                let requestBody = {}
+
+                try {
+                    if (contentType && contentType.includes('application/json')) {
                         requestBody = await request.json()
-                    }catch(err){
-                        return new Response(JSON.stringify({
-                            'code': 400,
-                            'message': `request bind failed: ${err}`,
-                            'timestamp': util.getTimestamp()
-                        }), { status: 400 })
-                    }
-                }else if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
-                    const formData = await request.formData()
-                    formData.forEach((value, key) => {requestBody[key] = value})
-                }else{
-                    searchParams.forEach((value, key) => {requestBody[key] = value})
-                    if(pathParts.length === 3){
-                        requestBody.body = pathParts[2]
+                    }else if (contentType && contentType.includes('application/x-www-form-urlencoded')){
+                        const formData = await request.formData()
+                        formData.forEach((value, key) => {requestBody[key] = value})
                     }else{
-                        requestBody.title = pathParts[2]
-                        requestBody.body = pathParts[3]
+                        const {searchParams} = new URL(request.url)
+                        searchParams.forEach((value, key) => {requestBody[key] = value})
+
+                        if (pathParts.length === 3) {
+                            requestBody.body = pathParts[2]
+                        } else {
+                            requestBody.title = pathParts[2]
+                            requestBody.body = pathParts[3]
+                        }
                     }
+                } catch (err) {
+                    return new Response(JSON.stringify({
+                        'code': 400,
+                        'message': `request bind failed: ${err}`,
+                        'timestamp': util.getTimestamp(),
+                    }), { status: 400 })
                 }
 
-                requestBody.device_key = pathParts[1]
+                if(pathname != '/push'){
+                    requestBody.device_key = pathParts[1]
+                }
 
                 return handler.push(requestBody)
             }
@@ -89,9 +80,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.1"
-        this.build = "2024-02-06 16:32:00"
+        this.build = "2024-02-06 17:49:15"
         this.arch = "js"
-        this.commit = "281d8732b3b7ff0e18196b54ea32a457ab075d6d"
+        this.commit = "c1b17d6d0adc7dd5beeea4144bb74dc32671e92d"
 
         const db = new Database(env)
 
@@ -203,7 +194,8 @@ class Handler {
             const copy = parameters.copy || undefined
             const badge = parameters.badge || 0
             const autoCopy = parameters.autoCopy || undefined
-            const ciphertext = parameters.ciphertext || undefined
+            
+            let ciphertext = parameters.ciphertext || undefined
 
             let aps = {
                 'aps': {
