@@ -33,7 +33,7 @@ async function handleRequest(request, env, ctx) {
             }catch(err){
                 return new Response(JSON.stringify({
                     'code': 400,
-                    'message': 'request bind failed: ' + err,
+                    'message': `request bind failed: ${err}`,
                     'timestamp': util.getTimestamp()
                 }), { status: 400 })
             }
@@ -52,17 +52,17 @@ async function handleRequest(request, env, ctx) {
                     }catch(err){
                         return new Response(JSON.stringify({
                             'code': 400,
-                            'message': 'request bind failed: ' + err,
+                            'message': `request bind failed: ${err}`,
                             'timestamp': util.getTimestamp()
                         }), { status: 400 })
                     }
                 }else{
                     searchParams.forEach((value, key) => {requestBody[key] = value})
                     if(pathParts.length === 3){
-                        requestBody.body = decodeURIComponent(pathParts[2])
+                        requestBody.body = pathParts[2]
                     }else{
-                        requestBody.title = decodeURIComponent(pathParts[2])
-                        requestBody.body = decodeURIComponent(pathParts[3])
+                        requestBody.title = pathParts[2]
+                        requestBody.body = pathParts[3]
                     }
                 }
 
@@ -73,7 +73,7 @@ async function handleRequest(request, env, ctx) {
 
             return new Response(JSON.stringify({
                 'code': 404,
-                'message': 'Cannot ' + request.method + ' ' + pathname,
+                'message': `Cannot ${request.method} ${pathname}`,
                 'timestamp': util.getTimestamp()
             }), { status: 404 })
         }
@@ -86,9 +86,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.1"
-        this.build = "2024-02-06 14:08:20"
+        this.build = "2024-02-06 15:16:54"
         this.arch = "js"
-        this.commit = "711ac02b912971634f052dc7543c78b922dcae36"
+        this.commit = "4b2a5c1d3900797670cbfd81ffdf65a82f95cf60"
 
         const db = new Database(env)
 
@@ -174,14 +174,17 @@ class Handler {
 
             if (!deviceToken) {
                 return new Response(JSON.stringify({
-                    'message': 'Access Denied: Invalid Key',
-                    'code': 500,
+                    'code': 400,
+                    'message': `failed to get device token: failed to get [${parameters.device_key}] device token from database`,
                     'timestamp': util.getTimestamp(),
-                }), { status: 500 })
+                }), { status: 400 })
             }
 
-            const title = parameters.title || undefined
-            const body = parameters.body || "NoContent"
+            let title = parameters.title || undefined
+            if(title){
+                title = decodeURIComponent(title)
+            }
+            const body = decodeURIComponent(parameters.body || "NoContent")
 
             let sound = parameters.sound || '1107'
             if (!sound.endsWith('.caf')) {
@@ -253,7 +256,8 @@ class Handler {
                 }), { status: 200 })
             } else {
                 return new Response(JSON.stringify({
-                    'message': 'push failed: ' + Object.values(JSON.parse(await response.text()))[0],
+                    // 'message': `push failed: ${Object.values(JSON.parse(await response.text()))[0]}`,
+                    'message': `push failed: ${JSON.parse(await response.text()).reason}`,
                     'code': response.status,
                     'timestamp': util.getTimestamp(),
                 }), { status: response.status })
