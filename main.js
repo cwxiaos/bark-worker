@@ -56,6 +56,9 @@ async function handleRequest(request, env, ctx) {
                             'timestamp': util.getTimestamp()
                         }), { status: 400 })
                     }
+                }else if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
+                    const formData = await request.formData()
+                    formData.forEach((value, key) => {requestBody[key] = value})
                 }else{
                     searchParams.forEach((value, key) => {requestBody[key] = value})
                     if(pathParts.length === 3){
@@ -86,9 +89,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.1"
-        this.build = "2024-02-06 15:16:54"
+        this.build = "2024-02-06 16:32:00"
         this.arch = "js"
-        this.commit = "4b2a5c1d3900797670cbfd81ffdf65a82f95cf60"
+        this.commit = "281d8732b3b7ff0e18196b54ea32a457ab075d6d"
 
         const db = new Database(env)
 
