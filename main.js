@@ -80,9 +80,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.1"
-        this.build = "2024-02-06 17:49:15"
+        this.build = "2024-02-09 08:53:34"
         this.arch = "js"
-        this.commit = "c1b17d6d0adc7dd5beeea4144bb74dc32671e92d"
+        this.commit = "aca0457e9d7193353ae2972220dc4505c82efba6"
 
         const db = new Database(env)
 
@@ -351,7 +351,8 @@ class Database {
         }
 
         this.deviceTokenByKey = async (key) => {
-            const deviceToken = await kvStorage.get(key)
+            const device_key = key.replace(/[^a-zA-Z0-9]/g, '') || "_"
+            const deviceToken = await kvStorage.get(device_key)
             return deviceToken
         }
 
