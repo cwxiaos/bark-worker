@@ -40,7 +40,6 @@ async function handleRequest(request, env, ctx) {
                         const formData = await request.formData()
                         formData.forEach((value, key) => {requestBody[key] = value})
                     }else{
-                        const {searchParams} = new URL(request.url)
                         searchParams.forEach((value, key) => {requestBody[key] = value})
 
                         if (pathParts.length === 3) {
@@ -80,9 +79,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.1"
-        this.build = "2024-02-09 08:53:34"
+        this.build = "2024-02-09 10:32:19"
         this.arch = "js"
-        this.commit = "aca0457e9d7193353ae2972220dc4505c82efba6"
+        this.commit = "283c9ac7bf0ab98c1143e277e2571288c60db462"
 
         const db = new Database(env)
 
@@ -251,7 +250,6 @@ class Handler {
                 }), { status: 200 })
             } else {
                 return new Response(JSON.stringify({
-                    // 'message': `push failed: ${Object.values(JSON.parse(await response.text()))[0]}`,
                     'message': `push failed: ${JSON.parse(await response.text()).reason}`,
                     'code': response.status,
                     'timestamp': util.getTimestamp(),
@@ -320,7 +318,7 @@ class APNs {
             const AUTHENTICATION_TOKEN = await getAuthToken()
             const pushData = JSON.stringify(aps)
 
-            const response = await fetch(`https://${APNS_HOST_NAME}/3/device/${deviceToken}`, {
+            return await fetch(`https://${APNS_HOST_NAME}/3/device/${deviceToken}`, {
                 method: 'POST',
                 headers: {
                     'apns-topic': TOPIC,
@@ -330,8 +328,6 @@ class APNs {
                 },
                 body: pushData,
             })
-
-            return response
         }
 
     }
@@ -383,12 +379,16 @@ class Util {
         }
 
         this.newShortUUID = () => {
-            const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-            const length = 22 //Length of UUID
-            let customUUID = ''
+            const length = 22;
+            const randomArray = new Uint8Array(length);
+            crypto.getRandomValues(randomArray);
+          
+            const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let customUUID = '';
+            
             for (let i = 0; i < length; i++) {
-                const randomIndex = Math.floor(Math.random() * characters.length)
-                customUUID += characters[randomIndex]
+              const randomIndex = randomArray[i] % characters.length;
+              customUUID += characters.charAt(randomIndex);
             }
             return customUUID
         }
