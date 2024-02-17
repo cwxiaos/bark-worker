@@ -4,6 +4,8 @@ SERVER_ADDRESS=""
 DEVICE_KEY=""
 BAD_DEVICE_KEY=""
 
+DEVICE_TOKEN=""
+
 echo "Testing $SERVER_ADDRESS/$DEVICE_KEY"
 echo ""
 echo "---------------------------------------------------------------------"
@@ -92,5 +94,13 @@ echo "---------------------------------------------------------------------"
 echo ""
 
 curl -X "POST" "$SERVER_ADDRESS/$BAD_DEVICE_KEY"
+
+echo ""
+echo "---------------------------------------------------------------------"
+echo "Test Device Registeration"
+echo "---------------------------------------------------------------------"
+echo ""
+
+curl "$SERVER_ADDRESS/register?devicetoken=$DEVICE_TOKEN&key="
 
 echo ""

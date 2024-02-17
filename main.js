@@ -79,9 +79,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.1"
-        this.build = "2024-02-09 10:32:19"
+        this.build = "2024-02-17 17:39:51"
         this.arch = "js"
-        this.commit = "283c9ac7bf0ab98c1143e277e2571288c60db462"
+        this.commit = "8cfe3bb848353a775529d884d37240e42410d409"
 
         const db = new Database(env)
 
@@ -347,7 +347,7 @@ class Database {
         }
 
         this.deviceTokenByKey = async (key) => {
-            const device_key = key.replace(/[^a-zA-Z0-9]/g, '') || "_"
+            const device_key = key.replace(/[^a-zA-Z0-9]/g, '') || "_PLACE_HOLDER_"
             const deviceToken = await kvStorage.get(device_key)
             return deviceToken
         }
@@ -379,16 +379,16 @@ class Util {
         }
 
         this.newShortUUID = () => {
-            const length = 22;
-            const randomArray = new Uint8Array(length);
-            crypto.getRandomValues(randomArray);
+            const length = 22
+            const randomArray = new Uint8Array(length)
+            crypto.getRandomValues(randomArray)
           
-            const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let customUUID = '';
+            const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            let customUUID = ''
             
             for (let i = 0; i < length; i++) {
-              const randomIndex = randomArray[i] % characters.length;
-              customUUID += characters.charAt(randomIndex);
+                const randomIndex = randomArray[i] % characters.length
+                customUUID += characters.charAt(randomIndex)
             }
             return customUUID
         }
