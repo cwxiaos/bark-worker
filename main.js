@@ -44,9 +44,13 @@ async function handleRequest(request, env, ctx) {
 
                         if (pathParts.length === 3) {
                             requestBody.body = pathParts[2]
-                        } else {
+                        } else if (pathParts.length === 4) {
                             requestBody.title = pathParts[2]
                             requestBody.body = pathParts[3]
+                        } else if (pathParts.length === 5){
+                            requestBody.category = pathParts[2]
+                            requestBody.body = pathParts[3]
+                            requestBody.title = pathParts[4]
                         }
                     }
                 } catch (err) {
@@ -79,18 +83,17 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.1"
-        this.build = "2024-02-17 17:39:51"
+        this.build = "2024-02-18 09:36:34"
         this.arch = "js"
-        this.commit = "8cfe3bb848353a775529d884d37240e42410d409"
+        this.commit = "29bf5aca3fb004d1861f36a1ed85b07ca5cceb87"
 
         const db = new Database(env)
 
         this.register = async (parameters) => {
+            const deviceToken = parameters.get('devicetoken')
+            let key = parameters.get('key')
 
-            const param_devicetoken = parameters.get('devicetoken')
-            let param_key = parameters.get('key')
-
-            if (!param_devicetoken) {
+            if (!deviceToken) {
                 return new Response(JSON.stringify({
                     'message': 'device token is empty',
                     'code': 400,
@@ -98,10 +101,9 @@ class Handler {
                 }), { status: 400 })
             }
 
-            if (!param_key) {
+            if (!(key && await db.deviceTokenByKey(key))){
                 if (isAllowNewDevice) {
-                    param_key = util.newShortUUID()
-                    await db.saveDeviceTokenByKey(param_key, param_devicetoken)
+                    key = util.newShortUUID()
                 } else {
                     return new Response(JSON.stringify({
                         'message': "device registration failed: register disabled",
@@ -110,27 +112,16 @@ class Handler {
                 }
             }
 
-            const deviceToken = await db.deviceTokenByKey(param_key)
-            if (await deviceToken != param_devicetoken) {
-                if (isAllowNewDevice) {
-                    param_key = util.newShortUUID()
-                    await db.saveDeviceTokenByKey(param_key, param_devicetoken)
-                } else {
-                    return new Response(JSON.stringify({
-                        'message': "device registration failed: register disabled",
-                        'code': 500,
-                    }), { status: 500 })
-                }
-            }
+            await db.saveDeviceTokenByKey(key, deviceToken)
 
             return new Response(JSON.stringify({
                 'message': 'success',
                 'code': 200,
                 'timestamp': util.getTimestamp(),
                 'data': {
-                    'key': param_key,
-                    'device_key': param_key,
-                    'device_token': param_devicetoken,
+                    'key': key,
+                    'device_key': key,
+                    'device_token': deviceToken,
                 },
             }), { status: 200 })
         }
@@ -192,11 +183,10 @@ class Handler {
             const level = parameters.level || undefined
             const copy = parameters.copy || undefined
             const badge = parameters.badge || 0
-            const autoCopy = parameters.autoCopy || undefined
-            
-            let ciphertext = parameters.ciphertext || undefined
+            const autoCopy = parameters.autoCopy || undefined  
+            const ciphertext = parameters.ciphertext || undefined
 
-            let aps = {
+            const aps = {
                 'aps': {
                     'alert': {
                         'action': undefined,
@@ -279,14 +269,11 @@ class APNs {
 
             // Parse private key
             const privateKeyPEM = TOKEN_KEY.replace('-----BEGIN PRIVATE KEY-----', '').replace('-----END PRIVATE KEY-----', '').replace(/\s/g, '')
-
             // Decode private key
             const privateKeyArrayBuffer = util.base64ToArrayBuffer(privateKeyPEM)
             const privateKey = await crypto.subtle.importKey('pkcs8', privateKeyArrayBuffer, { name: 'ECDSA', namedCurve: 'P-256', }, false, ['sign'])
-
             const TEAM_ID = '5U8LBRXG3A'
             const AUTH_KEY_ID = 'LH4T9V5U4R'
-
             // Generate the JWT token
             const JWT_ISSUE_TIME = util.getTimestamp()
             const JWT_HEADER = btoa(JSON.stringify({ alg: 'ES256', kid: AUTH_KEY_ID })).replace('+', '-').replace('/', '_').replace(/=+$/, '')
@@ -329,7 +316,6 @@ class APNs {
                 body: pushData,
             })
         }
-
     }
 }
 
@@ -382,7 +368,7 @@ class Util {
             const length = 22
             const randomArray = new Uint8Array(length)
             crypto.getRandomValues(randomArray)
-          
+            
             const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
             let customUUID = ''
             

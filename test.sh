@@ -4,14 +4,16 @@ SERVER_ADDRESS=""
 DEVICE_KEY=""
 BAD_DEVICE_KEY=""
 
-DEVICE_TOKEN=""
+DEVICE_TOKEN="0000test0device0token0000"
 
+echo -e "\e[1;32m"
 echo "Testing $SERVER_ADDRESS/$DEVICE_KEY"
 echo ""
 echo "---------------------------------------------------------------------"
 echo "Test URL/KEY With Body"
 echo "---------------------------------------------------------------------"
 echo ""
+echo -e "\e[0m"
 
 curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY" \
      -H 'Content-Type: application/json; charset=utf-8' \
@@ -24,7 +26,7 @@ curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY" \
   "icon": "https://day.app/assets/images/avatar.jpg",
   "group": "test",
   "url": "https://mritd.com",
-  "isArchive": 0
+  "isArchive": "0"
 }'
 
 echo ""
@@ -40,22 +42,27 @@ curl -X "POST" "$SERVER_ADDRESS/push" \
   "icon": "https://day.app/assets/images/avatar.jpg",
   "group": "test",
   "url": "https://mritd.com",
-  "isArchive": 0
+  "isArchive": "0"
 }'
 
+echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"
 echo "Test URL/KEY With Message In URL"
 echo "---------------------------------------------------------------------"
 echo ""
+echo -e "\e[0m"
 
-ENCODED_TITLE=Test%20Title%20In%20URL
-ENCODED_MESSAGE=Test%20Message%20In%20URL
+ENCODED_TITLE="Test%20Title%20In%20URL"
+ENCODED_MESSAGE="Test%20Message%20In%20URL"
 
 curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_MESSAGE?isArchive=0"
 
 echo ""
 curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_TITLE/$ENCODED_MESSAGE?isArchive=0"
+
+echo ""
+curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/category/$ENCODED_TITLE/$ENCODED_MESSAGE?isArchive=0"
 
 # echo ""
 # echo "---------------------------------------------------------------------"
@@ -63,11 +70,13 @@ curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_TITLE/$ENCODED_MESSAGE?isAr
 # echo "---------------------------------------------------------------------"
 # echo ""
 
+echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"
 echo "Test ciphertext"
 echo "---------------------------------------------------------------------"
 echo ""
+echo -e "\e[0m"
 
 set -e
 json='{"body": "test", "sound": "birdsong"}'
@@ -87,20 +96,34 @@ echo $ciphertext
 # URL encoding the ciphertext, there may be special characters.
 curl --data-urlencode "ciphertext=$ciphertext" $SERVER_ADDRESS/$DEVICE_KEY?isArchive=0
 
+echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"
 echo "Test Bad Device Token"
 echo "---------------------------------------------------------------------"
 echo ""
+echo -e "\e[0m"
 
 curl -X "POST" "$SERVER_ADDRESS/$BAD_DEVICE_KEY"
 
+echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"
 echo "Test Device Registeration"
 echo "---------------------------------------------------------------------"
 echo ""
+echo -e "\e[0m"
 
 curl "$SERVER_ADDRESS/register?devicetoken=$DEVICE_TOKEN&key="
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
+echo "Test Reset Device Key"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+curl "$SERVER_ADDRESS/register?devicetoken=deleted&key=$BAD_DEVICE_KEY"
 
 echo ""
