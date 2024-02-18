@@ -83,9 +83,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.2"
-        this.build = "2024-02-18 16:07:53"
+        this.build = "2024-02-18 09:36:34"
         this.arch = "js"
-        this.commit = "e00cf7eddc7508611aaeeca22dc7d0cc5c283809"
+        this.commit = "29bf5aca3fb004d1861f36a1ed85b07ca5cceb87"
 
         const db = new Database(env)
 
@@ -321,32 +321,50 @@ class APNs {
  */
 class Database {
     constructor(env) {
-        // Make database private
-        const kvStorage = env.database
+        const db = env.database
+
+        db.exec('CREATE TABLE IF NOT EXISTS `devices` (`id` INTEGER PRIMARY KEY, `key` VARCHAR(255) NOT NULL, `token` VARCHAR(255) NOT NULL, UNIQUE (`key`))')
+        db.exec('CREATE TABLE IF NOT EXISTS `authorization` (`id` INTEGER PRIMARY KEY, `token` VARCHAR(255) NOT NULL, `time` VARCHAR(255) NOT NULL)')
 
         this.countAll = async () => {
-            const count = (await kvStorage.list()).keys.length
-            return count
+            const query = 'SELECT COUNT(*) as rowCount FROM `devices`'
+            const result = await db.prepare(query).run()
+            return result.results[0].rowCount
         }
 
         this.deviceTokenByKey = async (key) => {
             const device_key = key.replace(/[^a-zA-Z0-9]/g, '') || "_PLACE_HOLDER_"
-            const deviceToken = await kvStorage.get(device_key)
-            return deviceToken
+            const query = 'SELECT `token` FROM `devices` WHERE `key` = ?'
+            const result = await db.prepare(query).bind(device_key).run()
+            return result.results[0].token
         }
 
         this.saveDeviceTokenByKey = async (key, token) => {
-            const deviceToken = await kvStorage.put(key, token)
-            return await deviceToken
+            const query = 'INSERT OR REPLACE INTO `devices` (`key`, `token`) VALUES (?, ?)'
+            const result = await env.database.prepare(query).bind(key, token).run()
+            return result
         }
 
         this.saveAuthorizationToken = async (token) => {
-            const authToken = await kvStorage.put('_authToken_', token, { expirationTtl: 3000 })
-            return await authToken
+            const query = 'INSERT OR REPLACE INTO `authorization` (`id`, `token`, `time`) VALUES (1, ?, ?)'
+            const result = await db.prepare(query).bind(token, util.getTimestamp()).run()
+            return result
         }
 
         this.authorizationToken = async () => {
-            await kvStorage.get('_authToken_')
+            const query = 'SELECT `token`, `time` FROM `authorization` WHERE `id` = 1'
+            const result = await db.prepare(query).run()
+            
+            if (result.results.length > 0) {
+                const tokenTime = parseInt(result.results[0].time)
+                const timeDifference = util.getTimestamp() - tokenTime
+                
+                if(timeDifference <= 3000) {
+                    return result.results[0].token
+                }
+            }
+
+            return undefined
         }
     }
 }
