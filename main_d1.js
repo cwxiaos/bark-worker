@@ -49,8 +49,8 @@ async function handleRequest(request, env, ctx) {
                             requestBody.body = pathParts[3]
                         } else if (pathParts.length === 5){
                             requestBody.category = pathParts[2]
-                            requestBody.body = pathParts[3]
-                            requestBody.title = pathParts[4]
+                            requestBody.title = pathParts[3]
+                            requestBody.body = pathParts[4]
                         }
                     }
                 } catch (err) {
@@ -65,13 +65,21 @@ async function handleRequest(request, env, ctx) {
                     requestBody.device_key = pathParts[1]
                 }
 
+                if(!requestBody.device_key){
+                    return new Response(JSON.stringify({
+                        'code': 400,
+                        'message': 'device key is empty',
+                        'timestamp': util.getTimestamp(),
+                    }), { status: 400 })
+                }
+
                 return handler.push(requestBody)
             }
 
             return new Response(JSON.stringify({
                 'code': 404,
                 'message': `Cannot ${request.method} ${pathname}`,
-                'timestamp': util.getTimestamp()
+                'timestamp': util.getTimestamp(),
             }), { status: 404 })
         }
     }
@@ -83,9 +91,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.2"
-        this.build = "2024-02-18 09:36:34"
+        this.build = "2024-02-19 17:19:46"
         this.arch = "js"
-        this.commit = "29bf5aca3fb004d1861f36a1ed85b07ca5cceb87"
+        this.commit = "ac3d39de02748e6b3998e0c97ab62645684ab49a"
 
         const db = new Database(env)
 
@@ -329,14 +337,14 @@ class Database {
         this.countAll = async () => {
             const query = 'SELECT COUNT(*) as rowCount FROM `devices`'
             const result = await db.prepare(query).run()
-            return result.results[0].rowCount
+            return (result.results[0] || {"rowCount": 0}).rowCount
         }
 
         this.deviceTokenByKey = async (key) => {
-            const device_key = key.replace(/[^a-zA-Z0-9]/g, '') || "_PLACE_HOLDER_"
+            const device_key = (key || '').replace(/[^a-zA-Z0-9]/g, '') || "_PLACE_HOLDER_"
             const query = 'SELECT `token` FROM `devices` WHERE `key` = ?'
             const result = await db.prepare(query).bind(device_key).run()
-            return result.results[0].token
+            return (result.results[0] || {}).token
         }
 
         this.saveDeviceTokenByKey = async (key, token) => {

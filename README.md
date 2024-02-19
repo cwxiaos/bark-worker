@@ -1,31 +1,52 @@
-# Bark Server On Cloudflare Worker
+<p align="center">
+    <h1 align="center">Bark-Worker</h1>
+</p>
 
-This is a Bark Server On Cloudflare Worker.
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-## What is Bark
+**[中文文档](README.zh.md)**
 
-<img src="https://wx3.sinaimg.cn/mw690/0060lm7Tly1g0nfnjjxbbj30sg0sg757.jpg" width=200px height=200px />
+Bark-Worker is a [Bark-Server](https://github.com/Finb/bark-server) implenmention on Cloudflare Worker. It provides privacy-aware users with a cheap and private bark backend. 
 
+### What is [Bark](https://github.com/Finb/Bark)?
 [Bark](https://github.com/Finb/Bark) is an iOS App which allows you to push customed notifications to your iPhone.
 
-## Setup [[中文]](README_zh.md)
+> [!NOTE]
+> A domain is required if worker.dev is unavailable in your country/region
 
-### An availiable domian.
+## Features
+- Full Bark-Server APIs support
+    - `register`
+    - `ping`
+    - `healthz`
+    - `info`
+    - `push`
+- Path based parameters resolve
+- Easy to deploy, Cheap to use and Convenient to manage
 
-For Cloudflare Worker users, Create a new worker with KV, bind your KV to the bark-worker as 'database'.
+## Setup
 
-<img src="doc/images/Screenshot from 2023-10-24 08-54-05.png">
+> [!NOTE]
+> Select one, D1 or KV Version are both available. D1 Version is recommended for its higher usage than KV Version. However, Cloudflare D1 is still in `beta`, which is unstable, use at your own risk.
 
-<img src="doc/images/Screenshot from 2023-10-24 08-54-31.png">
+<!-- > [!CAUTION]
+> After Cloudflare D1 is not in Beta, KV Version maybe deprecated. -->
 
+Refer to [Setup Guide](doc/setup_guide.md)
 
-Here's where to bing KV:
+### Cloudflare D1 Version
 
-<img src="doc/images/Screenshot from 2023-10-25 22-05-51.png">
+Create a Worker and a D1 Database, bind D1 database to Worker with name `database`
 
-If you want to block new registeration, modify code at here:
+### Cloudflare KV Version
 
-<img src="doc/images/Screenshot from 2023-10-25 22-05-13.png">
+Create a Worker and a KV Storage, bind KV Storage to Worker with name `database`
 
-## If you think this project is helpful to you, please Star it.
+## Tips
 
+- Multi Device Key to one Device
+- Device Key Alias
+- D1 Database Manage in Console
+- etc.
+
+Refer to [Tips](doc/tips.md)

@@ -49,8 +49,8 @@ async function handleRequest(request, env, ctx) {
                             requestBody.body = pathParts[3]
                         } else if (pathParts.length === 5){
                             requestBody.category = pathParts[2]
-                            requestBody.body = pathParts[3]
-                            requestBody.title = pathParts[4]
+                            requestBody.title = pathParts[3]
+                            requestBody.body = pathParts[4]
                         }
                     }
                 } catch (err) {
@@ -63,6 +63,14 @@ async function handleRequest(request, env, ctx) {
 
                 if(pathname != '/push'){
                     requestBody.device_key = pathParts[1]
+                }
+
+                if(!requestBody.device_key){
+                    return new Response(JSON.stringify({
+                        'code': 400,
+                        'message': 'device key is empty',
+                        'timestamp': util.getTimestamp(),
+                    }), { status: 400 })
                 }
 
                 return handler.push(requestBody)
@@ -83,9 +91,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.0.2"
-        this.build = "2024-02-18 16:07:53"
+        this.build = "2024-02-19 17:19:46"
         this.arch = "js"
-        this.commit = "e00cf7eddc7508611aaeeca22dc7d0cc5c283809"
+        this.commit = "ac3d39de02748e6b3998e0c97ab62645684ab49a"
 
         const db = new Database(env)
 
@@ -330,7 +338,7 @@ class Database {
         }
 
         this.deviceTokenByKey = async (key) => {
-            const device_key = key.replace(/[^a-zA-Z0-9]/g, '') || "_PLACE_HOLDER_"
+            const device_key = (key || '').replace(/[^a-zA-Z0-9]/g, '') || "_PLACE_HOLDER_"
             const deviceToken = await kvStorage.get(device_key)
             return deviceToken
         }

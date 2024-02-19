@@ -3,6 +3,7 @@
 SERVER_ADDRESS=""
 DEVICE_KEY=""
 BAD_DEVICE_KEY=""
+INVALID_DEVICE_KEY=""
 
 DEVICE_TOKEN="0000test0device0token0000"
 
@@ -109,6 +110,16 @@ curl -X "POST" "$SERVER_ADDRESS/$BAD_DEVICE_KEY"
 echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"
+echo "Test Invalid Device Key"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+curl -X "POST" "$SERVER_ADDRESS/$INVALID_DEVICE_KEY"
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
 echo "Test Device Registeration"
 echo "---------------------------------------------------------------------"
 echo ""
@@ -125,5 +136,25 @@ echo ""
 echo -e "\e[0m"
 
 curl "$SERVER_ADDRESS/register?devicetoken=deleted&key=$BAD_DEVICE_KEY"
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
+echo "Test Server Info"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+curl "$SERVER_ADDRESS/info"
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
+echo "Test Empty Key"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+curl "$SERVER_ADDRESS/push"
 
 echo ""
