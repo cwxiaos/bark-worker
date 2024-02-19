@@ -13,7 +13,7 @@ Bark-Worker 是一个 [Bark-Server](https://github.com/Finb/bark-server) 在 Clo
 > 如果worker.dev域名在当前国家/地区不可用，则需要一个自己的域名
 
 ## 特性
-- 支持所有的Bark-Worker API
+- 支持所有的Bark-Server API
     - `register`
     - `ping`
     - `healthz`
@@ -34,11 +34,11 @@ Bark-Worker 是一个 [Bark-Server](https://github.com/Finb/bark-server) 在 Clo
 
 ### Cloudflare D1 版本
 
-Create a Worker and a D1 Database, bind D1 database to Worker with name `database`
+创建一个Worker和D1 数据库, 将D1 数据库绑定至Worker并命名为 `database`
 
 ### Cloudflare KV 版本
 
-Create a Worker and a KV Storage, bind KV Storage to Worker with name `database`
+创建一个Worker和KV 存储, 将KV 存储绑定至Worker并命名为 `database`
 
 ## Tips
 
