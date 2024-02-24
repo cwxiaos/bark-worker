@@ -91,9 +91,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.0"
-        this.build = "2024-02-19 17:33:31"
+        this.build = "2024-02-24 13:14:47"
         this.arch = "js"
-        this.commit = "0758fdaa00072e310163c36209923c21e68d6e10"
+        this.commit = "d157d32c353aa381b18236a455b2421f188bd5a6"
 
         const db = new Database(env)
 
@@ -380,15 +380,13 @@ class Util {
 
         this.newShortUUID = () => {
             const length = 22
-            const randomArray = new Uint8Array(length)
-            crypto.getRandomValues(randomArray)
-
             const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            const randomValues = crypto.getRandomValues(new Uint8Array(length))
+
             let customUUID = ''
             
             for (let i = 0; i < length; i++) {
-                const randomIndex = randomArray[i] % characters.length
-                customUUID += characters.charAt(randomIndex)
+                customUUID += characters[61 & randomValues[i]]
             }
             return customUUID
         }
