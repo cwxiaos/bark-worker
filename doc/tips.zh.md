@@ -57,17 +57,13 @@ UPDATE devices SET id = id - desiered_distance WHERE id > desiered_index;
 移动不连续的ID, 每次移动一个不连续ID
 
 ```
-WITH GapRecords AS (
-  SELECT
-    id,
-    LAG(id) OVER (ORDER BY id) AS prev_id
-  FROM devices
-)
-
 UPDATE devices
-SET id = id - (id - prev_id - 1)
-FROM GapRecords
-WHERE GapRecords.id IS NOT NULL AND devices.id > GapRecords.prev_id;
+SET id = new_id
+FROM (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY rowid) AS new_id
+    FROM devices
+) AS new_ids
+WHERE devices.id = new_ids.id;
 ```
 
 ## D1 Worker 报错
