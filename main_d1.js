@@ -91,9 +91,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.0"
-        this.build = "2024-03-12 12:36:20"
+        this.build = "2024-04-12 20:57:41"
         this.arch = "js"
-        this.commit = "50e5d8a5ffe6fd8e7ccc4cc28e0fcd4d1656febb"
+        this.commit = "6f65b864b763e727ae741a4b9e0431becfeff4aa"
 
         const db = new Database(env)
 

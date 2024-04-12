@@ -25,7 +25,7 @@ Bark-Worker 是一个 [Bark-Server](https://github.com/Finb/bark-server) 在 Clo
 ## 部署
 
 > [!NOTE]
-> 从D1版本和KV版本中选择一个. 更推荐D1版本, D1版本的额度更高. 但是Cloudflare D1还在Beta, 可能不稳定, 使用风险自负.
+> 从D1版本和KV版本中选择一个. 更推荐D1版本, D1版本的额度更高.
 
 <!-- > [!CAUTION]
 > 当Cloudfalre D1不再Beta后, KV版本的Database部分可能停止维护. -->

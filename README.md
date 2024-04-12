@@ -27,7 +27,7 @@ Bark-Worker is a [Bark-Server](https://github.com/Finb/bark-server) implenmentio
 ## Setup
 
 > [!NOTE]
-> Select one, D1 or KV Version are both available. D1 Version is recommended for its higher usage than KV Version. However, Cloudflare D1 is still in `beta`, which is unstable, use at your own risk.
+> Select one, D1 or KV Version are both available. D1 Version is recommended for its higher usage than KV Version
 
 <!-- > [!CAUTION]
 > After Cloudflare D1 is not in Beta, KV Version maybe deprecated. -->
