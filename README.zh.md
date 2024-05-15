@@ -4,6 +4,9 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
+> [!ANNOUNCEMENT]
+> 在2024-08-01， D1 Alpha数据库将停止接受SQL查询，需要使用新的D1数据库，参考[迁移指南](https://developers.cloudflare.com/d1/platform/alpha-migration/)
+
 Bark-Worker 是一个 [Bark-Server](https://github.com/Finb/bark-server) 在 Cloudflare Worker 上的实现. 为隐私敏感的用户提供一个低成本且保证隐私的服务端.
 
 ### 什么是 [Bark](https://github.com/Finb/Bark)?
