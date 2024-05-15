@@ -6,7 +6,7 @@
 
 **[中文文档](README.zh.md)**
 
-> [!ANNOUNCEMENT]
+> [!CAUTION]
 > On August 1, 2024, D1 alpha databases will stop accepting live SQL queries. See [Migration Guide](https://developers.cloudflare.com/d1/platform/alpha-migration/)
 
 Bark-Worker is a [Bark-Server](https://github.com/Finb/bark-server) implenmention on Cloudflare Worker. It provides privacy-aware users with a cheap and private bark backend. 
