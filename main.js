@@ -58,7 +58,12 @@ async function handleRequest(request, env, ctx) {
                         'code': 400,
                         'message': `request bind failed: ${err}`,
                         'timestamp': util.getTimestamp(),
-                    }), { status: 400 })
+                    }), {
+                        status: 400,
+                        headers: {
+                            'content-type': 'application/json',
+                        }
+                    })
                 }
 
                 if(pathname != '/push'){
@@ -70,7 +75,12 @@ async function handleRequest(request, env, ctx) {
                         'code': 400,
                         'message': 'device key is empty',
                         'timestamp': util.getTimestamp(),
-                    }), { status: 400 })
+                    }), {
+                        status: 400,
+                        headers: {
+                            'content-type': 'application/json',
+                        }
+                    })
                 }
 
                 return handler.push(requestBody)
@@ -80,7 +90,12 @@ async function handleRequest(request, env, ctx) {
                 'code': 404,
                 'message': `Cannot ${request.method} ${pathname}`,
                 'timestamp': util.getTimestamp(),
-            }), { status: 404 })
+            }), {
+                status: 404,
+                headers: {
+                    'content-type': 'application/json',
+                }
+            })
         }
     }
 }
@@ -91,9 +106,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.0"
-        this.build = "2024-05-15 18:57:48"
+        this.build = "2024-06-07 03:06:55"
         this.arch = "js"
-        this.commit = "2e295a2811b55208f9c5ae7389ffa37307ab35e5"
+        this.commit = "4b85c5b32abab698bc0f0ffe650fbf03466f9cce"
 
         const db = new Database(env)
 
@@ -106,7 +121,12 @@ class Handler {
                     'message': 'device token is empty',
                     'code': 400,
                     'timestamp': util.getTimestamp(),
-                }), { status: 400 })
+                }), {
+                    status: 400,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
             }
 
             if (!(key && await db.deviceTokenByKey(key))){
@@ -116,7 +136,12 @@ class Handler {
                     return new Response(JSON.stringify({
                         'message': "device registration failed: register disabled",
                         'code': 500,
-                    }), { status: 500 })
+                    }), {
+                        status: 500,
+                        headers: {
+                            'content-type': 'application/json',
+                        }
+                    })
                 }
             }
 
@@ -131,7 +156,12 @@ class Handler {
                     'device_key': key,
                     'device_token': deviceToken,
                 },
-            }), { status: 200 })
+            }), {
+                status: 200,
+                headers: {
+                    'content-type': 'application/json',
+                }
+            })
         }
 
         this.ping = async (parameters) => {
@@ -139,11 +169,20 @@ class Handler {
                 'message': 'pong',
                 'code': 200,
                 'timestamp': util.getTimestamp(),
-            }), { status: 200 })
+            }), {
+                status: 200,
+                headers: {
+                    'content-type': 'application/json',
+                }
+            })
         }
 
         this.healthz = async (parameters) => {
-            return new Response("ok")
+            return new Response("ok", {
+                headers: {
+                    'content-type': 'text/plain',
+                }
+            })
         }
 
         this.info = async (parameters) => {
@@ -157,7 +196,12 @@ class Handler {
                 'arch': this.arch,
                 'commit': this.commit,
                 'devices': this.devices,
-            }), { status: 200 })
+            }), {
+                status: 200,
+                headers: {
+                    'content-type': 'application/json',
+                }
+            })
         }
 
         this.push = async (parameters) => {
@@ -169,7 +213,12 @@ class Handler {
                     'code': 400,
                     'message': `failed to get device token: failed to get [${parameters.device_key}] device token from database`,
                     'timestamp': util.getTimestamp(),
-                }), { status: 400 })
+                }), {
+                    status: 400,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
             }
 
             let title = parameters.title || undefined
@@ -245,13 +294,23 @@ class Handler {
                     'message': 'success',
                     'code': 200,
                     'timestamp': util.getTimestamp(),
-                }), { status: 200 })
+                }), {
+                    status: 200,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
             } else {
                 return new Response(JSON.stringify({
                     'message': `push failed: ${JSON.parse(await response.text()).reason}`,
                     'code': response.status,
                     'timestamp': util.getTimestamp(),
-                }), { status: response.status })
+                }), {
+                    status: response.status,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
             }
         }
     }
