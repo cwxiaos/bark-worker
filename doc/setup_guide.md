@@ -36,7 +36,7 @@ Then Click `Edit Code`
     <img src="images/setup/Screenshot from 2024-02-19 08-29-29.png" width="500">
 </p>
 
-Copy Code From [main.js](../main.js) or [main_d1.js](../main_d1.js) and Paste It
+Copy Code From [main.js](../main.js) or [main_kv.js](../main_kv.js) and Paste It
 
 <p align="center">
     <img src="images/setup/Screenshot from 2024-02-19 08-30-20.png" width="500">

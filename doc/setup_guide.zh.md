@@ -36,7 +36,7 @@
     <img src="images/setup/Screenshot from 2024-02-19 08-29-29.png" width="500">
 </p>
 
-从 [main.js](../main.js) 或 [main_d1.js](../main_d1.js) 复制代码并粘贴
+从 [main.js](../main.js) 或 [main_kv.js](../main_kv.js) 复制代码并粘贴
 
 <p align="center">
     <img src="images/setup/Screenshot from 2024-02-19 08-30-20.png" width="500">

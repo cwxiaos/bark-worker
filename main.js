@@ -106,9 +106,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.0"
-        this.build = "2024-06-07 03:06:55"
+        this.build = "2024-06-07 15:18:45"
         this.arch = "js"
-        this.commit = "4b85c5b32abab698bc0f0ffe650fbf03466f9cce"
+        this.commit = "be1679fa2bdd0827be0c44c08c332b794f9891fe"
 
         const db = new Database(env)
 
@@ -301,8 +301,17 @@ class Handler {
                     }
                 })
             } else {
+                let message
+                const responseText = await response.text()
+                
+                try {
+                    message = JSON.parse(responseText).reason
+                } catch (err) {
+                    message = responseText
+                }
+
                 return new Response(JSON.stringify({
-                    'message': `push failed: ${JSON.parse(await response.text()).reason}`,
+                    'message': `push failed: ${message}`,
                     'code': response.status,
                     'timestamp': util.getTimestamp(),
                 }), {
