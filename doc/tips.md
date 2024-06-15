@@ -38,7 +38,7 @@ Modify `rootPath` as follow:
 This feature can be used with Cloudflare WAF, to use WAF, goto `Websites` &rarr; `Security` &rarr; `WAF`.
 
 <p align="center">
-    <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png“ width="500">
+    <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png" width="500">
 </p>
 
 ## D1 Database Console Management

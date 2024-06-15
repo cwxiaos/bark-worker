@@ -38,7 +38,7 @@ meSud8TZYBoyAi6cKuBNLi  00fc13adff785122b4ad28809a3420982341241421348097878e577c
 此功能可配合Cloudflare WAF实现防御,在`Websites` &rarr; `Security` &rarr; `WAF`下配置规则
 
 <p align="center">
-    <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png“ width="500">
+    <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png" width="500">
 </p>
 
 ## D1 数据库 Console 管理
