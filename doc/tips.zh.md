@@ -73,3 +73,15 @@ WHERE devices.id = new_ids.id;
 ```
 curl https://SERVER_ADDRESS/info
 ```
+
+## 使用自定义路径
+
+修改 `rootPath` 为需要的路径:
+
+```diff
+ // 根路径
+-const rootPath = '/'
++const rootPath = '/123456/'
+```
+
+注意 `rootPath` 的开头和结尾必须是 `/`，Deploy 后，使用时 API 地址从 `https://SERVER_ADDRESS` 改为 `https://SERVER_ADDRESS/123456`，注意填在 Bark APP 中不要带最后的 `/`。
