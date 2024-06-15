@@ -8,12 +8,14 @@ export default {
 const isAllowNewDevice = false
 // 是否允许查询设备数量
 const isAllowQueryNums = false
+// 根路径
+const rootPath = '/'
 
 async function handleRequest(request, env, ctx) {
     const { searchParams, pathname } = new URL(request.url)
     const handler = new Handler(env)
-
-    switch (pathname) {
+    const realPathname = pathname.replace((new RegExp('^'+rootPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"))), '/')
+    switch (realPathname) {
         case "/register": {
             return handler.register(searchParams)
         }
@@ -27,7 +29,7 @@ async function handleRequest(request, env, ctx) {
             return handler.info(searchParams)
         }
         default: {
-            const pathParts = pathname.split('/')
+            const pathParts = realPathname.split('/')
 
             if(pathParts[1]){
                 const contentType = request.headers.get('content-type')
@@ -66,7 +68,7 @@ async function handleRequest(request, env, ctx) {
                     })
                 }
 
-                if(pathname != '/push'){
+                if(realPathname != '/push'){
                     requestBody.device_key = pathParts[1]
                 }
 
@@ -88,7 +90,7 @@ async function handleRequest(request, env, ctx) {
 
             return new Response(JSON.stringify({
                 'code': 404,
-                'message': `Cannot ${request.method} ${pathname}`,
+                'message': `Cannot ${request.method} ${realPathname}`,
                 'timestamp': util.getTimestamp(),
             }), {
                 status: 404,
