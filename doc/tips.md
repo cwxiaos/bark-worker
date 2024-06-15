@@ -22,6 +22,25 @@ meSud8TZYBoyAi6cKuBNLi  00fc13adff785122b4ad28809a3420982341241421348097878e577c
 
 So You Can use Both Keys to push message to your device.
 
+## Custom Root Path
+
+Modify `rootPath` as follow:
+
+```diff
+ // Root Path
+-- const rootPath = '/'
+++ const rootPath = '/custome-path/'
+```
+
+> [!NOTE]
+> Note `rootPath` must start with `/` and end with `/`, use `https://SERVER_ADDRESS` instead of `https://SERVER_ADDRESS/custome-path`.
+
+This feature can be used with Cloudflare WAF
+
+<p align="center">
+    <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png“ width="500">
+</p>
+
 ## D1 Database Console Management
 
 ### Clear All Test or Deleted Token

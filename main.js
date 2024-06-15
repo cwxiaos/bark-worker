@@ -15,6 +15,7 @@ async function handleRequest(request, env, ctx) {
     const { searchParams, pathname } = new URL(request.url)
     const handler = new Handler(env)
     const realPathname = pathname.replace((new RegExp('^'+rootPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"))), '/')
+
     switch (realPathname) {
         case "/register": {
             return handler.register(searchParams)
@@ -108,9 +109,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.0"
-        this.build = "2024-06-07 15:18:45"
+        this.build = "2024-06-16 00:38:06"
         this.arch = "js"
-        this.commit = "be1679fa2bdd0827be0c44c08c332b794f9891fe"
+        this.commit = "266abd8dedee1dcc89f16d6c1e5de5e245be8546"
 
         const db = new Database(env)
 
@@ -407,7 +408,7 @@ class Database {
         this.countAll = async () => {
             const query = 'SELECT COUNT(*) as rowCount FROM `devices`'
             const result = await db.prepare(query).run()
-            return (result.results[0] || {"rowCount": 0}).rowCount
+            return (result.results[0] || {"rowCount": -1}).rowCount
         }
 
         this.deviceTokenByKey = async (key) => {

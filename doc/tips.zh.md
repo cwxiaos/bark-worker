@@ -22,6 +22,25 @@ meSud8TZYBoyAi6cKuBNLi  00fc13adff785122b4ad28809a3420982341241421348097878e577c
 
 这样, 就可以使用自定义的Key向设备发送信息
 
+## 自定义根路径
+
+修改 `rootPath` 为需要的路径:
+
+```diff
+ // 根路径
+-- const rootPath = '/'
+++ const rootPath = '/custome-path/'
+```
+
+> [!NOTE]
+> 注意 `rootPath` 的开头和结尾必须是 `/`,使用时 API 地址从 `https://SERVER_ADDRESS` 改为 `https://SERVER_ADDRESS/custome-path`,注意填在 Bark APP 中不要带最后的 `/`。
+
+此功能可配合Cloudflare WAF实现防御
+
+<p align="center">
+    <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png“ width="500">
+</p>
+
 ## D1 数据库 Console 管理
 
 ### 清理测试或Deleted设备
@@ -73,15 +92,3 @@ WHERE devices.id = new_ids.id;
 ```
 curl https://SERVER_ADDRESS/info
 ```
-
-## 使用自定义路径
-
-修改 `rootPath` 为需要的路径:
-
-```diff
- // 根路径
--const rootPath = '/'
-+const rootPath = '/123456/'
-```
-
-注意 `rootPath` 的开头和结尾必须是 `/`，Deploy 后，使用时 API 地址从 `https://SERVER_ADDRESS` 改为 `https://SERVER_ADDRESS/123456`，注意填在 Bark APP 中不要带最后的 `/`。
