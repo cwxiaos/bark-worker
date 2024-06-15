@@ -35,7 +35,7 @@ Modify `rootPath` as follow:
 > [!NOTE]
 > Note `rootPath` must start with `/` and end with `/`, use `https://SERVER_ADDRESS` instead of `https://SERVER_ADDRESS/custome-path`.
 
-This feature can be used with Cloudflare WAF
+This feature can be used with Cloudflare WAF, to use WAF, goto `Websites` &rarr; `Security` &rarr; `WAF`.
 
 <p align="center">
     <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png“ width="500">

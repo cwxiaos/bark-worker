@@ -8,12 +8,15 @@ export default {
 const isAllowNewDevice = false
 // 是否允许查询设备数量
 const isAllowQueryNums = false
+// 根路径
+const rootPath = '/'
 
 async function handleRequest(request, env, ctx) {
     const { searchParams, pathname } = new URL(request.url)
     const handler = new Handler(env)
-
-    switch (pathname) {
+    const realPathname = pathname.replace((new RegExp('^'+rootPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"))), '/')
+    
+    switch (realPathname) {
         case "/register": {
             return handler.register(searchParams)
         }
@@ -27,7 +30,7 @@ async function handleRequest(request, env, ctx) {
             return handler.info(searchParams)
         }
         default: {
-            const pathParts = pathname.split('/')
+            const pathParts = realPathname.split('/')
 
             if(pathParts[1]){
                 const contentType = request.headers.get('content-type')
@@ -66,7 +69,7 @@ async function handleRequest(request, env, ctx) {
                     })
                 }
 
-                if(pathname != '/push'){
+                if(realPathname != '/push'){
                     requestBody.device_key = pathParts[1]
                 }
 
@@ -88,7 +91,7 @@ async function handleRequest(request, env, ctx) {
 
             return new Response(JSON.stringify({
                 'code': 404,
-                'message': `Cannot ${request.method} ${pathname}`,
+                'message': `Cannot ${request.method} ${realPathname}`,
                 'timestamp': util.getTimestamp(),
             }), {
                 status: 404,
@@ -106,9 +109,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.0"
-        this.build = "2024-06-16 00:38:06"
+        this.build = "2024-06-16 00:39:59"
         this.arch = "js"
-        this.commit = "266abd8dedee1dcc89f16d6c1e5de5e245be8546"
+        this.commit = "d4672db88379792662e95b06a7492e04ac0f0e83"
 
         const db = new Database(env)
 

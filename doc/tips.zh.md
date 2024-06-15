@@ -35,7 +35,7 @@ meSud8TZYBoyAi6cKuBNLi  00fc13adff785122b4ad28809a3420982341241421348097878e577c
 > [!NOTE]
 > 注意 `rootPath` 的开头和结尾必须是 `/`,使用时 API 地址从 `https://SERVER_ADDRESS` 改为 `https://SERVER_ADDRESS/custome-path`,注意填在 Bark APP 中不要带最后的 `/`。
 
-此功能可配合Cloudflare WAF实现防御
+此功能可配合Cloudflare WAF实现防御,在`Websites` &rarr; `Security` &rarr; `WAF`下配置规则
 
 <p align="center">
     <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png“ width="500">
