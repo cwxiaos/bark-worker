@@ -285,6 +285,7 @@ class Handler {
                 'copy': copy,
                 'badge': badge,
                 'autocopy': autoCopy,
+                'group': group,
             }
             // return new Response(JSON.stringify(aps))
 
