@@ -40,9 +40,9 @@ Modify `rootPath` as follow:
 
 This feature can be used with Cloudflare Routes.
 
-<p align="center">
+<!-- <p align="center">
     <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png" width="500">
-</p>
+</p> -->
 
 ## D1 Database Console Management
 

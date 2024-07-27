@@ -1,4 +1,4 @@
-name = "app-bark"
+name = "bark-worker"
 main = "main.js"
 compatibility_date = "2024-07-01"
 

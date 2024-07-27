@@ -108,7 +108,7 @@ async function handleRequest(request, env, ctx) {
  */
 class Handler {
     constructor(env) {
-        this.version = "v2.1.0"
+        this.version = "v2.1.1"
         this.build = "2024-07-27 22:15:28"
         this.arch = "js"
         this.commit = "a1a698302a3fff2801c50ea48bc19bd8ef3c4ceb"
