@@ -2,6 +2,9 @@
 
 ## Multi Device Key to One Device & Set Key Alias
 
+> [!NOTE]
+> In iOS 18, token may change after a period of time. If you need to use multiple keys or key alias, you can add the same server in your App for multiple times. If you need to use key alias, you can add the same server in your App, then manually set the key alias in database, and then use the reset key function in App to specify the key alias.
+
 In KV or D1 Database, Manually Set Records as follow:
 
 D1:
@@ -35,7 +38,7 @@ Modify `rootPath` as follow:
 > [!NOTE]
 > Note `rootPath` must start with `/` and end with `/`, use `https://SERVER_ADDRESS` instead of `https://SERVER_ADDRESS/custome-path`.
 
-This feature can be used with Cloudflare WAF, to use WAF, goto `Websites` &rarr; `Security` &rarr; `WAF`.
+This feature can be used with Cloudflare Routes.
 
 <p align="center">
     <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png" width="500">

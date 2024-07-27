@@ -1,4 +1,8 @@
-name = "bark-worker"
-main = "src/index.js"
-compatibility_date = "2024-05-01"
+name = "app-bark"
+main = "main.js"
+compatibility_date = "2024-07-01"
 
+[[d1_databases]]
+binding = "database" # available in your Worker on env.database
+database_name = "<name-for-your-database>"
+database_id = "<unique-ID-for-your-database>"

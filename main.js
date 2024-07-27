@@ -109,9 +109,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.0"
-        this.build = "2024-06-16 00:54:29"
+        this.build = "2024-07-27 22:15:28"
         this.arch = "js"
-        this.commit = "ebedc4f5174bfe5f22042de6101391c88aaad4c8"
+        this.commit = "a1a698302a3fff2801c50ea48bc19bd8ef3c4ceb"
 
         const db = new Database(env)
 
@@ -246,35 +246,42 @@ class Handler {
             const autoCopy = parameters.autoCopy || undefined  
             const ciphertext = parameters.ciphertext || undefined
 
+            // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
                 'aps': {
                     'alert': {
-                        'action': undefined,
-                        'action-loc-key': undefined,
-                        'body': body,
-                        'launch-image': undefined,
-                        'loc-args': undefined,
-                        'loc-key': undefined,
                         'title': title,
                         'subtitle': undefined,
-                        'title-loc-args': undefined,
+                        'body': body,
+                        'launch-image': undefined,
                         'title-loc-key': undefined,
-                        'summary-arg': undefined,
-                        'summary-arg-count': undefined,
+                        'title-loc-args': undefined,
+                        'subtitle-loc-key': undefined,
+                        'subtitle-loc-args': undefined,
+                        'loc-key': undefined,
+                        'loc-args': undefined,
                     },
                     'badge': 0,
-                    'category': category,
-                    'content-available': undefined,
-                    'interruption-level': undefined,
-                    'mutable-content': 1,
-                    'relevance-score': undefined,
                     'sound': {
                         'critical': 0,
                         'name': sound,
                         'volume': 1.0,
                     },
                     'thread-id': group,
-                    'url-args': undefined,
+                    'category': category,
+                    'content-available': undefined,
+                    'mutable-content': 1,
+                    'target-content-id': undefined,
+                    'interruption-level': undefined,
+                    'relevance-score': undefined,
+                    'filter-criteria': undefined,
+                    'stale-date': undefined,
+                    'content-state': undefined,
+                    'timestamp': undefined,
+                    'event': undefined,
+                    'dimissal-date': undefined,
+                    'attributes-type': undefined,
+                    'attributes': undefined,
                 },
                 // ExtParams
                 'isarchive': isArchive,
@@ -420,8 +427,9 @@ class Database {
         }
 
         this.saveDeviceTokenByKey = async (key, token) => {
+            const device_token = (token || '').replace(/[^a-z0-9]/g, '') || "_PLACE_HOLDER_"
             const query = 'INSERT OR REPLACE INTO `devices` (`key`, `token`) VALUES (?, ?)'
-            const result = await db.prepare(query).bind(key, token).run()
+            const result = await db.prepare(query).bind(key, device_token).run()
             return result
         }
 

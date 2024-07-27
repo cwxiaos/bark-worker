@@ -2,6 +2,9 @@
 
 ## 一个设备多个Key或Key别名
 
+> [!NOTE]
+> 在iOS 18上观察到token变化的情况,此方法可能在使用一段时间后失效.如有多Key使用需求,直接在App中添加多次服务器即可.如果需要使用别名,先在App中添加一次服务器,在数据库中手动修改Key为别名,随后在App中使用重置Key功能指定Key别名.
+
 在KV或D1数据库中, 按如下格式手动修改数据:
 
 D1:
@@ -35,7 +38,7 @@ meSud8TZYBoyAi6cKuBNLi  00fc13adff785122b4ad28809a3420982341241421348097878e577c
 > [!NOTE]
 > 注意 `rootPath` 的开头和结尾必须是 `/`,使用时 API 地址从 `https://SERVER_ADDRESS` 改为 `https://SERVER_ADDRESS/custome-path`,注意填在 Bark APP 中不要带最后的 `/`。
 
-此功能可配合Cloudflare WAF实现防御,在`Websites` &rarr; `Security` &rarr; `WAF`下配置规则
+此功能可配合Cloudflare Routes实现防御.
 
 <p align="center">
     <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png" width="500">
