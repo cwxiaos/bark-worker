@@ -6,8 +6,8 @@
 
 **[中文文档](README.zh.md)**
 
-> [!CAUTION]
-> There are bugs in Cloudflare Dashboard for now(2024-07-27), deploy and variables edit are not available, DONOT change anything before Cloudflare fix that. If you want to deploy, use wrangler.
+<!-- > [!CAUTION]
+> There are bugs in Cloudflare Dashboard for now(2024-07-27), deploy and variables edit are not available, DONOT change anything before Cloudflare fix that. If you want to deploy, use wrangler. -->
 
 > [!NOTE]
 > On iOS 18, device token may change, the previous way to use multi-key or key alias may be unavailable, refer to [Tips](doc/tips.md) for more details.
