@@ -44,6 +44,18 @@ meSud8TZYBoyAi6cKuBNLi  00fc13adff785122b4ad28809a3420982341241421348097878e577c
     <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png" width="500">
 </p> -->
 
+## Basic Auth
+按如下方式设置 `basicAuth`:
+```
+const basicAuth = 'username:password'
+```
+
+<p align="center">
+    <img src="images/tips/Screenshot from 2024-09-18 18-13-07.png">
+</p>
+
+在发送请求时需要设置Header中的 `Authorization` 为 `Basic base64(username:password)`
+
 ## D1 数据库 Console 管理
 
 ### 清理测试或Deleted设备

@@ -140,12 +140,14 @@ curl "$SERVER_ADDRESS/register?devicetoken=deleted&key=$BAD_DEVICE_KEY"
 echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"
-echo "Test Server Info"
+echo "Test Server Info (with Basic Auth)"
 echo "---------------------------------------------------------------------"
 echo ""
 echo -e "\e[0m"
 
 curl "$SERVER_ADDRESS/info"
+
+curl "$SERVER_ADDRESS/info" -u admin:admin
 
 echo -e "\e[1;32m"
 echo ""

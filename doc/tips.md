@@ -44,6 +44,18 @@ This feature can be used with Cloudflare Routes.
     <img src="images/tips/Screenshot from 2024-06-16 00-11-33.png" width="500">
 </p> -->
 
+## Basic Auth
+Set `basicAuth` as follow:
+```
+const basicAuth = 'username:password'
+```
+
+<p align="center">
+    <img src="images/tips/Screenshot from 2024-09-18 18-13-07.png">
+</p>
+
+When send a request, a header `Authorization` need to be set with `Basic base64(username:password)`.
+
 ## D1 Database Console Management
 
 ### Clear All Test or Deleted Token

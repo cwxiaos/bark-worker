@@ -10,6 +10,8 @@ const isAllowNewDevice = false
 const isAllowQueryNums = false
 // 根路径
 const rootPath = '/'
+// Basic Auth username:password
+const basicAuth = ''
 
 async function handleRequest(request, env, ctx) {
     const { searchParams, pathname } = new URL(request.url)
@@ -27,12 +29,30 @@ async function handleRequest(request, env, ctx) {
             return handler.healthz(searchParams)
         }
         case "/info": {
+            if (!util.validateBasicAuth(request)) {
+                return new Response('I\'m a teapot', {
+                    status: 418,
+                    headers: {
+                        'content-type': 'text/plain',
+                    }
+                })
+            }
+
             return handler.info(searchParams)
         }
         default: {
             const pathParts = realPathname.split('/')
 
-            if(pathParts[1]){
+            if (pathParts[1]) {
+                if (!util.validateBasicAuth(request)) {
+                    return new Response('I\'m a teapot', {
+                        status: 418,
+                        headers: {
+                            'content-type': 'text/plain',
+                        }
+                    })
+                }
+
                 const contentType = request.headers.get('content-type')
                 let requestBody = {}
 
@@ -50,7 +70,7 @@ async function handleRequest(request, env, ctx) {
                         } else if (pathParts.length === 4) {
                             requestBody.title = pathParts[2]
                             requestBody.body = pathParts[3]
-                        } else if (pathParts.length === 5){
+                        } else if (pathParts.length === 5) {
                             requestBody.category = pathParts[2]
                             requestBody.title = pathParts[3]
                             requestBody.body = pathParts[4]
@@ -69,11 +89,11 @@ async function handleRequest(request, env, ctx) {
                     })
                 }
 
-                if(realPathname != '/push'){
+                if (realPathname != '/push') {
                     requestBody.device_key = pathParts[1]
                 }
 
-                if(!requestBody.device_key){
+                if (!requestBody.device_key) {
                     return new Response(JSON.stringify({
                         'code': 400,
                         'message': 'device key is empty',
@@ -108,10 +128,10 @@ async function handleRequest(request, env, ctx) {
  */
 class Handler {
     constructor(env) {
-        this.version = "v2.1.1"
-        this.build = "2024-07-27 22:15:28"
+        this.version = "v2.1.2"
+        this.build = "2024-09-18 18:06:44"
         this.arch = "js"
-        this.commit = "a1a698302a3fff2801c50ea48bc19bd8ef3c4ceb"
+        this.commit = "4b3c0086e69dd5b90f13ddd3bbb361c613f43aec"
 
         const db = new Database(env)
 
@@ -208,7 +228,6 @@ class Handler {
         }
 
         this.push = async (parameters) => {
-            // return new Response(JSON.stringify(parameters))
             const deviceToken = await db.deviceTokenByKey(parameters.device_key)
 
             if (!deviceToken) {
@@ -225,7 +244,7 @@ class Handler {
             }
 
             let title = parameters.title || undefined
-            if(title){
+            if (title) {
                 title = decodeURIComponent(title)
             }
             const body = decodeURIComponent(parameters.body || "NoContent")
@@ -294,10 +313,8 @@ class Handler {
                 'autocopy': autoCopy,
                 'group': group,
             }
-            // return new Response(JSON.stringify(aps))
 
             const apns = new APNs(db)
-
             const response = await apns.push(deviceToken, aps)
 
             if (response.status === 200) {
@@ -446,8 +463,7 @@ class Database {
             if (result.results.length > 0) {
                 const tokenTime = parseInt(result.results[0].time)
                 const timeDifference = util.getTimestamp() - tokenTime
-                
-                if(timeDifference <= 3000) {
+                if (timeDifference <= 3000) {
                     return result.results[0].token
                 }
             }
@@ -484,9 +500,19 @@ class Util {
             let customUUID = ''
             
             for (let i = 0; i < length; i++) {
-                customUUID += characters[61 & randomValues[i]]
+                customUUID += characters[randomValues[i] % 62]
             }
             return customUUID
+        }
+
+        this.validateBasicAuth = (request) => {
+            if (basicAuth) {
+                const header = 'Basic ' + btoa(`${basicAuth}`)
+                const authHeader = request.headers.get('Authorization')
+                return header === authHeader
+            }
+
+            return true
         }
     }
 }
