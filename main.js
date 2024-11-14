@@ -5,9 +5,9 @@ export default {
 }
 
 // 这里决定是否允许新建设备
-const isAllowNewDevice = false
+const isAllowNewDevice = true
 // 是否允许查询设备数量
-const isAllowQueryNums = false
+const isAllowQueryNums = true
 // 根路径
 const rootPath = '/'
 // Basic Auth username:password
@@ -129,9 +129,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.2"
-        this.build = "2024-09-18 18:06:44"
+        this.build = "2024-11-14 20:07:34"
         this.arch = "js"
-        this.commit = "4b3c0086e69dd5b90f13ddd3bbb361c613f43aec"
+        this.commit = "2f7baa11bf7997b70dbcae54cfa5cfc9e43082c4"
 
         const db = new Database(env)
 
