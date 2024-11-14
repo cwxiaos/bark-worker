@@ -41,19 +41,22 @@ Bark-Worker 是一个 [Bark-Server](https://github.com/Finb/bark-server) 在 Clo
 <!-- > [!CAUTION]
 > 当Cloudfalre D1不再Beta后, KV版本的Database部分可能停止维护. -->
 
-参考 [部署指南](doc/setup_guide.zh.md)
-
-### Cloudflare D1 版本
-
-跟随提示部署:
+### 直接部署D1版本
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cwxiaos/bark-worker)
 
-或手动部署:
+> [!NOTE]
+> Cloudflare API Token必须有D1权限
+
+### 或手动部署
+
+参考 [部署指南](doc/setup_guide.zh.md)
+
+#### Cloudflare D1 版本
 
 创建一个Worker和D1 数据库, 将D1 数据库绑定至Worker并命名为 `database`
 
-### Cloudflare KV 版本
+#### Cloudflare KV 版本
 
 创建一个Worker和KV 存储, 将KV 存储绑定至Worker并命名为 `database`
 

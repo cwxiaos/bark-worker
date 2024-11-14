@@ -41,19 +41,24 @@ Bark-Worker is a [Bark-Server](https://github.com/Finb/bark-server) implenmentio
 <!-- > [!CAUTION]
 > After Cloudflare D1 is not in Beta, KV Version maybe deprecated. -->
 
-Refer to [Setup Guide](doc/setup_guide.md)
-
-### Cloudflare D1 Version
-
-Follow the instructions:
+### Follow the instructions for D1 Version
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cwxiaos/bark-worker)
+
+> [!NOTE]
+> The Cloudflare API Token must have D1 permission.
+
+### Or manually deploy
+
+Refer to [Setup Guide](doc/setup_guide.md)
+
+#### Cloudflare D1 Version
 
 Or Manually Deploy
 
 Create a Worker and a D1 Database, bind D1 database to Worker with name `database`
 
-### Cloudflare KV Version
+#### Cloudflare KV Version
 
 Create a Worker and a KV Storage, bind KV Storage to Worker with name `database`
 
