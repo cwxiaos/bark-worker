@@ -45,6 +45,12 @@ Refer to [Setup Guide](doc/setup_guide.md)
 
 ### Cloudflare D1 Version
 
+Follow the instructions:
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cwxiaos/bark-worker)
+
+Or Manually Deploy
+
 Create a Worker and a D1 Database, bind D1 database to Worker with name `database`
 
 ### Cloudflare KV Version

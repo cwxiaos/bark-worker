@@ -45,6 +45,12 @@ Bark-Worker 是一个 [Bark-Server](https://github.com/Finb/bark-server) 在 Clo
 
 ### Cloudflare D1 版本
 
+跟随提示部署:
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cwxiaos/bark-worker)
+
+或手动部署:
+
 创建一个Worker和D1 数据库, 将D1 数据库绑定至Worker并命名为 `database`
 
 ### Cloudflare KV 版本

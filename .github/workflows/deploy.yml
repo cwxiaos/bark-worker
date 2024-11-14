@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  repository_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Verify Cloudflare API Token
+        run: |
+          echo "Verifying Cloudflare API Token..."
+          wrangler whoami
+
+      - name: Check and Create D1 Database
+        run: |
+          set -x
+          DB_LIST=$(wrangler d1 list --json)
+          DB_ID=$(echo $DB_LIST | jq -r '.[] | select(.name == "database-bark") | .uuid')
+
+          if [ -z "$DB_ID" ]; then
+            CREATE_OUTPUT=$(wrangler d1 create database-bark)
+            DB_ID=$(echo "$CREATE_OUTPUT" | sed -n 's/.*database_id = "\([^"]*\)".*/\1/p')
+          else
+            echo "Found existing database-bark database"
+          fi
+
+          echo "Database ID: $DB_ID"
+          echo "DB_ID=$DB_ID" >> $GITHUB_ENV
+
+      - name: update wrangler.toml
+        run: |
+          cd dist/service
+          sed -i 's/database_id = ".*"/database_id = "'$DB_ID'"/' wrangler.toml
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
