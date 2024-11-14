@@ -5,6 +5,9 @@ on:
     branches:
       - main
   repository_dispatch:
+  
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
 jobs:
   deploy:
@@ -25,7 +28,7 @@ jobs:
         run: |
           echo "Verifying Cloudflare API Token..."
           wrangler whoami
-
+          
       - name: Check and Create D1 Database
         run: |
           set -x
@@ -44,8 +47,12 @@ jobs:
 
       - name: update wrangler.toml
         run: |
-          cd dist/service
           sed -i 's/database_id = ".*"/database_id = "'$DB_ID'"/' wrangler.toml
 
-env:
-  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Deploy worker
+        uses: cloudflare/wrangler-action@v3.7.0
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: "deploy"
+          wranglerVersion: "3.77.0"
