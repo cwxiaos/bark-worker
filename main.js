@@ -249,10 +249,15 @@ class Handler {
             }
             const body = decodeURIComponent(parameters.body || "NoContent")
 
-            let sound = parameters.sound || '1107'
-            if (!sound.endsWith('.caf')) {
-                sound += '.caf'
+            let sound = parameters.sound || undefined
+            if (sound) {
+                if (!sound.endsWith('.caf')) {
+                    sound += '.caf'
+                }
+            } else {
+                sound = '1107'
             }
+            
             const category = parameters.category || 'myNotificationCategory'
             const group = parameters.group || undefined
             

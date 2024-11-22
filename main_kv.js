@@ -129,9 +129,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.3"
-        this.build = "2024-11-22 23:52:47"
+        this.build = "2024-11-23 00:32:33"
         this.arch = "js"
-        this.commit = "73210060060f2d073e29ecec7b895a8ab470a6e7"
+        this.commit = "93807afd5b13feafdc4ef90f3483d4a789696fb3"
 
         const db = new Database(env)
 
@@ -249,10 +249,15 @@ class Handler {
             }
             const body = decodeURIComponent(parameters.body || "NoContent")
 
-            let sound = parameters.sound || '1107'
-            if (!sound.endsWith('.caf')) {
-                sound += '.caf'
+            let sound = parameters.sound || undefined
+            if (sound) {
+                if (!sound.endsWith('.caf')) {
+                    sound += '.caf'
+                }
+            } else {
+                sound = '1107'
             }
+            
             const category = parameters.category || 'myNotificationCategory'
             const group = parameters.group || undefined
             
