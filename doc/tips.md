@@ -3,7 +3,7 @@
 ## Multi Device Key to One Device & Set Key Alias
 
 > [!NOTE]
-> In iOS 18, token may change after a period of time. If you need to use multiple keys or key alias, you can add the same server in your App for multiple times. If you need to use key alias, you can add the same server in your App, then manually set the key alias in database, and then use the reset key function in App to specify the key alias.
+> Device token may change after a period of time. If you need to use multiple keys or key alias, you can add the same server in your App for multiple times. If you need to use key alias, you can add the same server in your App, then manually set the key alias in database, and then use the reset key function in App to specify the key alias.
 
 In KV or D1 Database, Manually Set Records as follow:
 

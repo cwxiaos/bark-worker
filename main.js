@@ -128,10 +128,10 @@ async function handleRequest(request, env, ctx) {
  */
 class Handler {
     constructor(env) {
-        this.version = "v2.1.2"
-        this.build = "2024-11-14 20:10:05"
+        this.version = "v2.1.3"
+        this.build = "2024-11-22 23:52:47"
         this.arch = "js"
-        this.commit = "8bba6448095f56b0340b2df2af8eb7fbd13a5933"
+        this.commit = "73210060060f2d073e29ecec7b895a8ab470a6e7"
 
         const db = new Database(env)
 
@@ -254,16 +254,17 @@ class Handler {
                 sound += '.caf'
             }
             const category = parameters.category || 'myNotificationCategory'
-            const group = parameters.group || 'Default'
-
+            const group = parameters.group || undefined
+            
+            const call = parameters.call || undefined
             const isArchive = parameters.isArchive || undefined
             const icon = parameters.icon || undefined
-            const url = parameters.url || undefined
-            const level = parameters.level || undefined
-            const copy = parameters.copy || undefined
-            const badge = parameters.badge || 0
-            const autoCopy = parameters.autoCopy || undefined  
             const ciphertext = parameters.ciphertext || undefined
+            const level = parameters.level || undefined
+            const url = parameters.url || undefined
+            const copy = parameters.copy || undefined
+            const badge = parameters.badge || undefined
+            const autoCopy = parameters.autoCopy || undefined  
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
@@ -280,12 +281,8 @@ class Handler {
                         'loc-key': undefined,
                         'loc-args': undefined,
                     },
-                    'badge': 0,
-                    'sound': {
-                        'critical': 0,
-                        'name': sound,
-                        'volume': 1.0,
-                    },
+                    'badge': undefined,
+                    'sound': sound,
                     'thread-id': group,
                     'category': category,
                     'content-available': undefined,
@@ -303,6 +300,7 @@ class Handler {
                     'attributes': undefined,
                 },
                 // ExtParams
+                'call': call,
                 'isarchive': isArchive,
                 'icon': icon,
                 'ciphertext': ciphertext,
@@ -311,7 +309,6 @@ class Handler {
                 'copy': copy,
                 'badge': badge,
                 'autocopy': autoCopy,
-                'group': group,
             }
 
             const apns = new APNs(db)
