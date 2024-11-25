@@ -129,9 +129,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.3"
-        this.build = "2024-11-23 00:32:33"
+        this.build = "2024-11-25 22:56:28"
         this.arch = "js"
-        this.commit = "93807afd5b13feafdc4ef90f3483d4a789696fb3"
+        this.commit = "d88b0c821f81cc71ae343372661ce0c0d510f2c2"
 
         const db = new Database(env)
 
@@ -266,6 +266,7 @@ class Handler {
             const icon = parameters.icon || undefined
             const ciphertext = parameters.ciphertext || undefined
             const level = parameters.level || undefined
+            const volume = parameters.volume || undefined
             const url = parameters.url || undefined
             const copy = parameters.copy || undefined
             const badge = parameters.badge || undefined
@@ -310,6 +311,7 @@ class Handler {
                 'icon': icon,
                 'ciphertext': ciphertext,
                 'level': level,
+                'volume': volume,
                 'url': url,
                 'copy': copy,
                 'badge': badge,

@@ -129,9 +129,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.3"
-        this.build = "2024-11-22 23:52:47"
+        this.build = "2024-11-25 22:56:28"
         this.arch = "js"
-        this.commit = "73210060060f2d073e29ecec7b895a8ab470a6e7"
+        this.commit = "d88b0c821f81cc71ae343372661ce0c0d510f2c2"
 
         const db = new Database(env)
 
@@ -257,7 +257,7 @@ class Handler {
             } else {
                 sound = '1107'
             }
-            
+
             const category = parameters.category || 'myNotificationCategory'
             const group = parameters.group || undefined
             
@@ -266,10 +266,11 @@ class Handler {
             const icon = parameters.icon || undefined
             const ciphertext = parameters.ciphertext || undefined
             const level = parameters.level || undefined
+            const volume = parameters.volume || undefined
             const url = parameters.url || undefined
             const copy = parameters.copy || undefined
             const badge = parameters.badge || undefined
-            const autoCopy = parameters.autoCopy || undefined  
+            const autoCopy = parameters.autoCopy || undefined 
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
@@ -310,6 +311,7 @@ class Handler {
                 'icon': icon,
                 'ciphertext': ciphertext,
                 'level': level,
+                'volume': volume,
                 'url': url,
                 'copy': copy,
                 'badge': badge,

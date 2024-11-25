@@ -83,7 +83,7 @@
 点击 `Edit Variables` &rarr; `Add Binding`
 
 <p align="center">
-    <img src="images/setup/Screenshot from 2024-02-19 08-32-14.png">
+    <img src="images/setup/Screenshot from 2024-02-19 08-32-28.png">
 </p>
 
 <p align="center">
