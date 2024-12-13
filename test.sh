@@ -22,13 +22,15 @@ curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY" \
   "body": "Test Message In Body",
   "device_key": "'$BAD_DEVICE_KEY'",
   "title": "Test Title In Body",
+  "subtitle": "Test Subtitle In Body",
   "badge": 1,
-  "category": "myNotificationCategory",
   "icon": "https://day.app/assets/images/avatar.jpg",
   "group": "test",
   "url": "https://mritd.com",
   "isArchive": "0"
 }'
+
+# Seems that icon is not compatible with subtitle
 
 echo ""
 
@@ -38,8 +40,8 @@ curl -X "POST" "$SERVER_ADDRESS/push" \
   "body": "Test Message In Body",
   "device_key": "'$DEVICE_KEY'",
   "title": "Test Title In Body",
+  "subtitle": "Test Subtitle In Body",
   "badge": 1,
-  "category": "myNotificationCategory",
   "icon": "https://day.app/assets/images/avatar.jpg",
   "group": "test",
   "url": "https://mritd.com",
@@ -55,6 +57,7 @@ echo ""
 echo -e "\e[0m"
 
 ENCODED_TITLE="Test%20Title%20In%20URL"
+ENCODED_SUBTITLE="Test%20Subtitle%20In%20URL"
 ENCODED_MESSAGE="Test%20Message%20In%20URL"
 
 curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_MESSAGE?isArchive=0"
@@ -63,7 +66,7 @@ echo ""
 curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_TITLE/$ENCODED_MESSAGE?isArchive=0"
 
 echo ""
-curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/category/$ENCODED_TITLE/$ENCODED_MESSAGE?isArchive=0"
+curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY/$ENCODED_TITLE/$ENCODED_SUBTITLE/$ENCODED_MESSAGE?isArchive=0"
 
 # echo ""
 # echo "---------------------------------------------------------------------"
@@ -147,6 +150,7 @@ echo -e "\e[0m"
 
 curl "$SERVER_ADDRESS/info"
 
+echo ""
 curl "$SERVER_ADDRESS/info" -u admin:admin
 
 echo -e "\e[1;32m"

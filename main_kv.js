@@ -71,8 +71,8 @@ async function handleRequest(request, env, ctx) {
                             requestBody.title = pathParts[2]
                             requestBody.body = pathParts[3]
                         } else if (pathParts.length === 5) {
-                            requestBody.category = pathParts[2]
-                            requestBody.title = pathParts[3]
+                            requestBody.title = pathParts[2]
+                            requestBody.subtitle = pathParts[3]
                             requestBody.body = pathParts[4]
                         }
                     }
@@ -128,10 +128,10 @@ async function handleRequest(request, env, ctx) {
  */
 class Handler {
     constructor(env) {
-        this.version = "v2.1.3"
-        this.build = "2024-11-25 22:56:28"
+        this.version = "v2.1.4"
+        this.build = "2024-12-13 20:46:43"
         this.arch = "js"
-        this.commit = "d88b0c821f81cc71ae343372661ce0c0d510f2c2"
+        this.commit = "b7667ee3264c8fd8078ff9a7525d799c3da0651b"
 
         const db = new Database(env)
 
@@ -247,7 +247,18 @@ class Handler {
             if (title) {
                 title = decodeURIComponent(title)
             }
-            const body = decodeURIComponent(parameters.body || "NoContent")
+            let subtitle = parameters.subtitle || undefined
+            if (subtitle) {
+                subtitle = decodeURIComponent(subtitle)
+            }
+            let body = parameters.body || undefined
+            if (body) {
+                body = decodeURIComponent(body)
+            }
+
+            if (!title && !subtitle && !body) {
+                body = 'Empty message'
+            }
 
             let sound = parameters.sound || undefined
             if (sound) {
@@ -257,8 +268,7 @@ class Handler {
             } else {
                 sound = '1107'
             }
-            
-            const category = parameters.category || 'myNotificationCategory'
+
             const group = parameters.group || undefined
             
             const call = parameters.call || undefined
@@ -270,16 +280,14 @@ class Handler {
             const url = parameters.url || undefined
             const copy = parameters.copy || undefined
             const badge = parameters.badge || undefined
-            const autoCopy = parameters.autoCopy || undefined  
-            // 增加一些新属性
-            const subtitle = parameters.subtitle || undefined;
+            const autoCopy = parameters.autoCopy || undefined 
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
                 'aps': {
                     'alert': {
                         'title': title,
-                        'subtitle':subtitle,
+                        'subtitle': subtitle,
                         'body': body,
                         'launch-image': undefined,
                         'title-loc-key': undefined,
@@ -292,7 +300,7 @@ class Handler {
                     'badge': undefined,
                     'sound': sound,
                     'thread-id': group,
-                    'category': category,
+                    'category': 'myNotificationCategory',
                     'content-available': undefined,
                     'mutable-content': 1,
                     'target-content-id': undefined,
