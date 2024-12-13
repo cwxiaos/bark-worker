@@ -271,13 +271,16 @@ class Handler {
             const copy = parameters.copy || undefined
             const badge = parameters.badge || undefined
             const autoCopy = parameters.autoCopy || undefined 
+            // 增加一些新属性
+            const subtitle = parameters.subtitle || undefined
+    
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
                 'aps': {
                     'alert': {
                         'title': title,
-                        'subtitle': undefined,
+                        'subtitle': subtitle,
                         'body': body,
                         'launch-image': undefined,
                         'title-loc-key': undefined,
