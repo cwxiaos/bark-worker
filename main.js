@@ -245,15 +245,15 @@ class Handler {
 
             let title = parameters.title || undefined
             if (title) {
-                title = decodeURIComponent(title)
+                title = decodeURIComponent(title.replaceAll("\\+","%20"))
             }
             let subtitle = parameters.subtitle || undefined
             if (subtitle) {
-                subtitle = decodeURIComponent(subtitle)
+                subtitle = decodeURIComponent(subtitle.replaceAll("\\+","%20"))
             }
             let body = parameters.body || undefined
             if (body) {
-                body = decodeURIComponent(body)
+                body = decodeURIComponent(body.replaceAll("\\+","%20"))
             }
 
             if (!title && !subtitle && !body) {
