@@ -129,9 +129,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.4"
-        this.build = "2024-12-13 20:46:43"
+        this.build = "2024-12-16 18:27:31"
         this.arch = "js"
-        this.commit = "b7667ee3264c8fd8078ff9a7525d799c3da0651b"
+        this.commit = "10d6f31e53bddb011290fffa7b7ede7dd7dec666"
 
         const db = new Database(env)
 
@@ -245,15 +245,15 @@ class Handler {
 
             let title = parameters.title || undefined
             if (title) {
-                title = decodeURIComponent(title.replaceAll("+","%20"))
+                title = decodeURIComponent(title.replaceAll("\\+","%20"))
             }
             let subtitle = parameters.subtitle || undefined
             if (subtitle) {
-                subtitle = decodeURIComponent(subtitle.replaceAll("+","%20"))
+                subtitle = decodeURIComponent(subtitle.replaceAll("\\+","%20"))
             }
             let body = parameters.body || undefined
             if (body) {
-                body = decodeURIComponent(body.replaceAll("+","%20"))
+                body = decodeURIComponent(body.replaceAll("\\+","%20"))
             }
 
             if (!title && !subtitle && !body) {
