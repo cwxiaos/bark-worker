@@ -14,9 +14,9 @@ const rootPath = '/'
 const basicAuth = ''
 
 async function handleRequest(request, env, ctx) {
-    const { searchParams, pathname } = new URL(request.url)
+    const {searchParams, pathname} = new URL(request.url)
     const handler = new Handler(env)
-    const realPathname = pathname.replace((new RegExp('^'+rootPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"))), '/')
+    const realPathname = pathname.replace((new RegExp('^' + rootPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"))), '/')
 
     switch (realPathname) {
         case "/register": {
@@ -76,13 +76,46 @@ async function handleRequest(request, env, ctx) {
                             requestBody.body = pathParts[4]
                         }
                     }
-                } catch (err) {
+                    if (requestBody.device_keys && typeof requestBody.device_keys === 'string') {
+                        requestBody.device_keys = requestBody.device_keys.split(',').map(item => item.trim())
+                    }
+                } catch (error) {
                     return new Response(JSON.stringify({
                         'code': 400,
-                        'message': `request bind failed: ${err}`,
+                        'message': `request bind failed: ${error}`,
                         'timestamp': util.getTimestamp(),
                     }), {
                         status: 400,
+                        headers: {
+                            'content-type': 'application/json',
+                        }
+                    })
+                }
+
+                if (requestBody.device_keys && requestBody.device_keys.length > 0) {
+                    return new Response(JSON.stringify({
+                        'code': 200,
+                        'message': 'success',
+                        'data': await Promise.all(requestBody.device_keys.map(async (device_key) => {
+                            if (!device_key) {
+                                return {
+                                    message: 'device key is empty',
+                                    code: 400,
+                                    device_key: device_key,
+                                }
+                            }
+
+                            const response = await handler.push({...requestBody, device_key})
+                            const responseBody = await response.json()
+                            return {
+                                message: responseBody.message,
+                                code: response.status,
+                                device_key: device_key,
+                            }
+                        })),
+                        'timestamp': util.getTimestamp(),
+                    }), {
+                        status: 200,
                         headers: {
                             'content-type': 'application/json',
                         }
@@ -128,10 +161,10 @@ async function handleRequest(request, env, ctx) {
  */
 class Handler {
     constructor(env) {
-        this.version = "v2.1.4"
-        this.build = "2024-12-16 18:27:31"
+        this.version = "v2.1.5"
+        this.build = "2024-12-24 20:46:57"
         this.arch = "js"
-        this.commit = "10d6f31e53bddb011290fffa7b7ede7dd7dec666"
+        this.commit = "157609b4732361a55f3bb1bb6eb7d5ac31d2a583"
 
         const db = new Database(env)
 
@@ -141,8 +174,8 @@ class Handler {
 
             if (!deviceToken) {
                 return new Response(JSON.stringify({
-                    'message': 'device token is empty',
                     'code': 400,
+                    'message': 'device token is empty',
                     'timestamp': util.getTimestamp(),
                 }), {
                     status: 400,
@@ -157,8 +190,8 @@ class Handler {
                     key = util.newShortUUID()
                 } else {
                     return new Response(JSON.stringify({
-                        'message': "device registration failed: register disabled",
                         'code': 500,
+                        'message': "device registration failed: register disabled",
                     }), {
                         status: 500,
                         headers: {
@@ -171,8 +204,8 @@ class Handler {
             await db.saveDeviceTokenByKey(key, deviceToken)
 
             return new Response(JSON.stringify({
-                'message': 'success',
                 'code': 200,
+                'message': 'success',
                 'timestamp': util.getTimestamp(),
                 'data': {
                     'key': key,
@@ -189,8 +222,8 @@ class Handler {
 
         this.ping = async (parameters) => {
             return new Response(JSON.stringify({
-                'message': 'pong',
                 'code': 200,
+                'message': 'pong',
                 'timestamp': util.getTimestamp(),
             }), {
                 status: 200,
@@ -333,8 +366,8 @@ class Handler {
 
             if (response.status === 200) {
                 return new Response(JSON.stringify({
-                    'message': 'success',
                     'code': 200,
+                    'message': 'success',
                     'timestamp': util.getTimestamp(),
                 }), {
                     status: 200,
@@ -353,8 +386,8 @@ class Handler {
                 }
 
                 return new Response(JSON.stringify({
-                    'message': `push failed: ${message}`,
                     'code': response.status,
+                    'message': `push failed: ${message}`,
                     'timestamp': util.getTimestamp(),
                 }), {
                     status: response.status,
@@ -469,6 +502,7 @@ class Database {
         }
     }
 }
+
 
 /**
  * Class Util

@@ -12,6 +12,9 @@ English | **[中文文档](README.zh.md)**
 > [!NOTE]
 > Device token may change, the previous way to use multi-key or key alias may be unavailable, refer to [Tips](doc/tips.md) for more details.
 
+> [!NOTE]
+> Batch Push has the highest priority, if `device_keys` is specified and not empty, `device_key` will be ignored, in both V1 and V2 APIs.
+
 <!-- > [!CAUTION]
 > For D1 Alpha Users: On August 1, 2024, D1 alpha databases will stop accepting live SQL queries. See [Migration Guide](https://developers.cloudflare.com/d1/platform/alpha-migration/) -->
 

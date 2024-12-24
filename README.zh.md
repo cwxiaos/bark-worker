@@ -12,6 +12,9 @@
 > [!NOTE]
 > Device token可能发生变化, 之前使用多Key或Key别名的方法可能会失效, 如有多Key使用需要参考[Tips](doc/tips.zh.md).
 
+> [!NOTE]
+> 批量推送有最高优先级, 如果指定了`device_keys`且不为空, `device_key`将被忽略.
+
 <!-- > [!CAUTION]
 > 对于D1 Alpha用户： 在2024-08-01之后， D1 Alpha数据库将停止接受SQL查询，需要使用新的D1数据库，参考[迁移指南](https://developers.cloudflare.com/d1/platform/alpha-migration/) -->
 

@@ -5,6 +5,10 @@ DEVICE_KEY=""
 BAD_DEVICE_KEY=""
 INVALID_DEVICE_KEY=""
 
+BATCH_PUSH_KEY_1=""
+BATCH_PUSH_KEY_2=$DEVICE_KEY
+BATCH_PUSH_KEY_3=$BAD_DEVICE_KEY
+
 DEVICE_TOKEN="0000test0device0token0000"
 
 echo -e "\e[1;32m"
@@ -29,8 +33,6 @@ curl -X "POST" "$SERVER_ADDRESS/$DEVICE_KEY" \
   "url": "https://mritd.com",
   "isArchive": "0"
 }'
-
-# Seems that icon is not compatible with subtitle
 
 echo ""
 
@@ -103,6 +105,36 @@ curl --data-urlencode "ciphertext=$ciphertext" $SERVER_ADDRESS/$DEVICE_KEY?isArc
 echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"
+echo "Test Batch Push"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+curl -X "POST" "$SERVER_ADDRESS/push" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "body": "Test Batch Message In Body",
+  "group": "testBatchPush",
+  "url": "https://mritd.com",
+  "isArchive": "0",
+  "device_keys": ["'$BATCH_PUSH_KEY_1'", "'$BATCH_PUSH_KEY_2'", "'$BATCH_PUSH_KEY_3'"]
+}'
+
+echo ""
+
+curl -X "POST" "$SERVER_ADDRESS/push" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "body": "Test Batch Message In Body",
+  "group": "testBatchPush",
+  "url": "https://mritd.com",
+  "isArchive": "0",
+  "device_keys": "'$BATCH_PUSH_KEY_1','$BATCH_PUSH_KEY_2','$BATCH_PUSH_KEY_3'"
+}'
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
 echo "Test Bad Device Token"
 echo "---------------------------------------------------------------------"
 echo ""
@@ -162,5 +194,29 @@ echo ""
 echo -e "\e[0m"
 
 curl "$SERVER_ADDRESS/push"
+
+echo ""
+
+curl -X "POST" "$SERVER_ADDRESS/push" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "body": "Test Batch Message In Body",
+  "group": "testBatchPush",
+  "url": "https://mritd.com",
+  "isArchive": "0",
+  "device_keys": ",,"
+}'
+
+echo ""
+
+curl -X "POST" "$SERVER_ADDRESS/push" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "body": "Test Batch Message In Body",
+  "group": "testBatchPush",
+  "url": "https://mritd.com",
+  "isArchive": "0",
+  "device_keys": []
+}'
 
 echo ""
