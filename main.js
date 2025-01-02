@@ -30,12 +30,13 @@ async function handleRequest(request, env, ctx) {
         }
         case "/info": {
             if (!util.validateBasicAuth(request)) {
-                return new Response('I\'m a teapot', {
-                    status: 418,
-                    headers: {
-                        'content-type': 'text/plain',
-                    }
-                })
+                return new Response('Unauthorized', {
+                        status: 401,
+                        headers: {
+                            'content-type': 'text/plain',
+                            'WWW-Authenticate': 'Basic',
+                        }
+                    })
             }
 
             return handler.info(searchParams)
@@ -45,10 +46,11 @@ async function handleRequest(request, env, ctx) {
 
             if (pathParts[1]) {
                 if (!util.validateBasicAuth(request)) {
-                    return new Response('I\'m a teapot', {
-                        status: 418,
+                    return new Response('Unauthorized', {
+                        status: 401,
                         headers: {
                             'content-type': 'text/plain',
+                            'WWW-Authenticate': 'Basic',
                         }
                     })
                 }
