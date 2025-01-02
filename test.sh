@@ -132,6 +132,15 @@ curl -X "POST" "$SERVER_ADDRESS/push" \
   "device_keys": "'$BATCH_PUSH_KEY_1','$BATCH_PUSH_KEY_2','$BATCH_PUSH_KEY_3'"
 }'
 
+echo ""
+
+curl -X "POST" "$SERVER_ADDRESS/push/Body?device_keys=$BATCH_PUSH_KEY_1,$BATCH_PUSH_KEY_2,$BATCH_PUSH_KEY_3"
+
+echo ""
+
+#"$SERVER_ADDRESS/push/Body?device_keys=["$BATCH_PUSH_KEY_1", "$BATCH_PUSH_KEY_2", "$BATCH_PUSH_KEY_3"]"
+curl -X "POST" "$SERVER_ADDRESS/push/Body?device_keys=%5B%22$BATCH_PUSH_KEY_1%22%2C%20%22$BATCH_PUSH_KEY_2%22%2C%20%22$BATCH_PUSH_KEY_3%22%5D"
+
 echo -e "\e[1;32m"
 echo ""
 echo "---------------------------------------------------------------------"

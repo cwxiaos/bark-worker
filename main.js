@@ -79,7 +79,15 @@ async function handleRequest(request, env, ctx) {
                         }
                     }
                     if (requestBody.device_keys && typeof requestBody.device_keys === 'string') {
-                        requestBody.device_keys = requestBody.device_keys.split(',').map(item => item.trim())
+                        if (requestBody.device_keys.startsWith('[') || requestBody.device_keys.endsWith(']')) {
+                            requestBody.device_keys = JSON.parse(requestBody.device_keys)
+                        } else {
+                            requestBody.device_keys = (decodeURIComponent(requestBody.device_keys).trim()).split(',').map(item => item.replace(/"/g, '').trim())
+                        }
+
+                        if (typeof requestBody.device_keys === 'string') {
+                            requestBody.device_keys = [requestBody.device_keys]
+                        }
                     }
                 } catch (error) {
                     return new Response(JSON.stringify({
@@ -164,9 +172,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.5"
-        this.build = "2024-12-24 20:46:57"
+        this.build = "2025-01-01 18:22:43"
         this.arch = "js"
-        this.commit = "157609b4732361a55f3bb1bb6eb7d5ac31d2a583"
+        this.commit = "552d242c385b24171efd7135824686e90b45bd27"
 
         const db = new Database(env)
 
