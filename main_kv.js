@@ -76,7 +76,7 @@ async function handleRequest(request, env, ctx) {
                             requestBody.title = pathParts[2]
                             requestBody.subtitle = pathParts[3]
                             requestBody.body = pathParts[4]
-                        } else {
+                        } else if (pathParts.length > 5) {
                             return new Response(JSON.stringify({
                                 'code': 404,
                                 'message': `Cannot ${request.method} ${realPathname}`,
@@ -183,9 +183,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.5"
-        this.build = "2025-02-06 20:55:13"
+        this.build = "2025-02-06 21:09:16"
         this.arch = "js"
-        this.commit = "1e2e18fe4f5a25f3104e905a643592604ca9fac"
+        this.commit = "74d827a722d4783976b4afc773c4ace123608d10"
 
         const db = new Database(env)
 
