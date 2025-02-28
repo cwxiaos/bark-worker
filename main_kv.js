@@ -370,6 +370,7 @@ class Handler {
                     'attributes': undefined,
                 },
                 // ExtParams
+                'group': group,
                 'call': call,
                 'isarchive': isArchive,
                 'icon': icon,
