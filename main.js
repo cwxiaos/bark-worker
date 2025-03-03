@@ -479,6 +479,7 @@ class APNs {
                 method: 'POST',
                 headers: {
                     'apns-topic': TOPIC,
+                    'apns-expiration': Math.floor(Date.now() / 1000) + 86400,
                     'apns-push-type': 'alert',
                     'authorization': `bearer ${AUTHENTICATION_TOKEN}`,
                     'content-type': 'application/json',
