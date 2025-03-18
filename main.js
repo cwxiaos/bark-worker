@@ -76,7 +76,7 @@ async function handleRequest(request, env, ctx) {
                             requestBody.title = pathParts[2]
                             requestBody.subtitle = pathParts[3]
                             requestBody.body = pathParts[4]
-                        } else if(pathParts.length > 5) {
+                        } else if (pathParts.length > 5) {
                             return new Response(JSON.stringify({
                                 'code': 404,
                                 'message': `Cannot ${request.method} ${realPathname}`,
@@ -182,10 +182,10 @@ async function handleRequest(request, env, ctx) {
  */
 class Handler {
     constructor(env) {
-        this.version = "v2.1.5"
-        this.build = "2025-02-06 21:09:16"
+        this.version = "v2.1.6"
+        this.build = "2025-03-18 19:27:55"
         this.arch = "js"
-        this.commit = "74d827a722d4783976b4afc773c4ace123608d10"
+        this.commit = "febf34e358426932516306cf8d53a1d0bd9bb0f9"
 
         const db = new Database(env)
 
@@ -208,7 +208,7 @@ class Handler {
 
             if (!(key && await db.deviceTokenByKey(key))){
                 if (isAllowNewDevice) {
-                    key = util.newShortUUID()
+                    key = await util.newShortUUID()
                 } else {
                     return new Response(JSON.stringify({
                         'code': 500,
@@ -334,7 +334,8 @@ class Handler {
             const url = parameters.url || undefined
             const copy = parameters.copy || undefined
             const badge = parameters.badge || undefined
-            const autoCopy = parameters.autoCopy || undefined 
+            const autoCopy = parameters.autoCopy || undefined
+            const action = parameters.action || undefined
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
@@ -381,6 +382,7 @@ class Handler {
                 'copy': copy,
                 'badge': badge,
                 'autocopy': autoCopy,
+                'action': action,
             }
 
             const apns = new APNs(db)
@@ -479,7 +481,7 @@ class APNs {
                 method: 'POST',
                 headers: {
                     'apns-topic': TOPIC,
-                    'apns-expiration': Math.floor(Date.now() / 1000) + 86400,
+                    'apns-expiration': util.getTimestamp() + 86400,
                     'apns-push-type': 'alert',
                     'authorization': `bearer ${AUTHENTICATION_TOKEN}`,
                     'content-type': 'application/json',
@@ -562,17 +564,12 @@ class Util {
             return buffer
         }
 
-        this.newShortUUID = () => {
-            const length = 22
-            const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-            const randomValues = crypto.getRandomValues(new Uint8Array(length))
+        this.newShortUUID = async () => {
+            const uuid = crypto.randomUUID()
+            const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(uuid))
+            const hashArray = Array.from(new Uint8Array(hashBuffer))
 
-            let customUUID = ''
-            
-            for (let i = 0; i < length; i++) {
-                customUUID += characters[randomValues[i] % 62]
-            }
-            return customUUID
+            return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 22)
         }
 
         this.validateBasicAuth = (request) => {
