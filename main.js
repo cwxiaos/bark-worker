@@ -5,7 +5,7 @@ export default {
 }
 
 // 这里决定是否允许新建设备
-const isAllowNewDevice = true
+const isAllowNewDevice = false
 // 是否允许查询设备数量
 const isAllowQueryNums = false
 // 根路径
