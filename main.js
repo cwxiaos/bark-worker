@@ -5,9 +5,9 @@ export default {
 }
 
 // 这里决定是否允许新建设备
-const isAllowNewDevice = false
+const isAllowNewDevice = true
 // 是否允许查询设备数量
-const isAllowQueryNums = true
+const isAllowQueryNums = false
 // 根路径
 const rootPath = '/'
 // Basic Auth username:password
