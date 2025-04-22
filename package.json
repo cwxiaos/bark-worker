@@ -1,0 +1,29 @@
+{
+    "name": "bark-worker",
+    "description": "Bark Server on Cloudflare Worker",
+    "cloudflare": {
+        "label": "Bark Server",
+        "products": [
+            "Workers",
+            "D1"
+        ],
+        "categories": [],
+        "icon_urls": [        ],
+        "docs_url": "https://developers.cloudflare.com/workers/",
+        "preview_image_url": "",
+        "dash": true
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "wrangler": "4.7.0"
+    },
+    "scripts": {
+        "cf-typegen": "wrangler types",
+        "db:migrate": "wrangler d1 migrations apply DB --local",
+        "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+        "deploy": "wrangler deploy",
+        "dev": "wrangler dev",
+        "predeploy": "npm run db:migrate:remote",
+        "preview": "wrangler dev"
+    }
+}
