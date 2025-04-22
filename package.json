@@ -19,11 +19,8 @@
     },
     "scripts": {
         "cf-typegen": "wrangler types",
-        "db:migrate": "wrangler d1 migrations apply database --local",
-        "db:migrate:remote": "wrangler d1 migrations apply database --remote",
         "deploy": "wrangler deploy",
         "dev": "wrangler dev",
-        "predeploy": "npm run db:migrate:remote",
         "preview": "wrangler dev"
     }
 }
