@@ -183,9 +183,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.6"
-        this.build = "2025-03-18 19:27:55"
+        this.build = "2025-04-24 21:49:52"
         this.arch = "js"
-        this.commit = "febf34e358426932516306cf8d53a1d0bd9bb0f9"
+        this.commit = "5b71b65593b5d2e97f794af04de6396e3d88346f"
 
         const db = new Database(env)
 
@@ -298,16 +298,32 @@ class Handler {
             }
 
             let title = parameters.title || undefined
-            if (title) {
-                title = decodeURIComponent(title.replaceAll("\\+","%20"))
-            }
             let subtitle = parameters.subtitle || undefined
-            if (subtitle) {
-                subtitle = decodeURIComponent(subtitle.replaceAll("\\+","%20"))
-            }
             let body = parameters.body || undefined
-            if (body) {
-                body = decodeURIComponent(body.replaceAll("\\+","%20"))
+
+            try {
+                if (title) {
+                    title = decodeURIComponent(title.replaceAll("\\+","%20"))
+                }
+                
+                if (subtitle) {
+                    subtitle = decodeURIComponent(subtitle.replaceAll("\\+","%20"))
+                }
+                
+                if (body) {
+                    body = decodeURIComponent(body.replaceAll("\\+","%20"))
+                }
+            } catch (error) {
+                return new Response(JSON.stringify({
+                    'code': 500,
+                    'meaasge': `url path parse failed: ${error}`,
+                    'timestamp': util.getTimestamp(),
+                }), {
+                    status: 500,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
             }
 
             if (!title && !subtitle && !body) {

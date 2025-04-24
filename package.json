@@ -13,9 +13,8 @@
         "preview_image_url": "",
         "dash": true
     },
-    "dependencies": {},
     "devDependencies": {
-        "wrangler": "4.7.0"
+        "wrangler": "^4.13.0"
     },
     "scripts": {
         "cf-typegen": "wrangler types",
