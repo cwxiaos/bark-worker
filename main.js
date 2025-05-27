@@ -183,9 +183,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.6"
-        this.build = "2025-04-24 21:49:52"
+        this.build = "2025-05-27 21:01:41"
         this.arch = "js"
-        this.commit = "5b71b65593b5d2e97f794af04de6396e3d88346f"
+        this.commit = "afaa6307537ccd15e2e6cc63d97239041eaae8e6"
 
         const db = new Database(env)
 
@@ -352,6 +352,7 @@ class Handler {
             const badge = parameters.badge || undefined
             const autoCopy = parameters.autoCopy || undefined
             const action = parameters.action || undefined
+            const iv = parameters.iv || undefined
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
@@ -399,6 +400,7 @@ class Handler {
                 'badge': badge,
                 'autocopy': autoCopy,
                 'action': action,
+                'iv': iv,
             }
 
             const apns = new APNs(db)
