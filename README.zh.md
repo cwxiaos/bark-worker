@@ -9,8 +9,8 @@
 <!-- > [!CAUTION]
 > Cloudflare Dashboard 目前(2024-07-27)存在Bug, 部署和变量编辑不可用, 在Cloudflare修复该问题之前请勿进行任何操作, 如果需要部署请使用wrangler. -->
 
-> [!NOTE]
-> Device token可能发生变化, 之前使用多Key或Key别名的方法可能会失效, 如有多Key使用需要参考[Tips](doc/tips.zh.md).
+<!-- > [!NOTE]
+> Device token可能发生变化, 之前使用多Key或Key别名的方法可能会失效, 如有多Key使用需要参考[Tips](doc/tips.zh.md). -->
 
 > [!NOTE]
 > 批量推送有最高优先级, 如果指定了`device_keys`且不为空, `device_key`将被忽略.

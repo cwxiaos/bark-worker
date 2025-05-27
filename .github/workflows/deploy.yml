@@ -4,15 +4,26 @@ on:
   push:
     branches:
       - main
-  repository_dispatch:
-  
-env:
-  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  workflow_dispatch:
+    inputs:
+      CLOUDFLARE_ACCOUNT_ID:
+        description: "Cloudflare Account ID"
+        default: ""
+        required: true
+        type: string
+      CLOUDFLARE_API_TOKEN:
+        description: "Cloudflare API Token"
+        default: ""
+        required: true
+        type: string
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
     name: Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +39,8 @@ jobs:
         run: |
           echo "Verifying Cloudflare API Token..."
           wrangler whoami
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
           
       - name: Check and Create D1 Database
         run: |
@@ -44,15 +57,17 @@ jobs:
 
           echo "Database ID: $DB_ID"
           echo "DB_ID=$DB_ID" >> $GITHUB_ENV
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
 
-      - name: update wrangler.toml
+      - name: Update wrangler.toml
         run: |
-          sed -i 's/database_id = ".*"/database_id = "'$DB_ID'"/' wrangler.toml
+          sed -i 's/"database_id": ".*"/"database_id": "'$DB_ID'"/' wrangler.json
 
       - name: Deploy worker
-        uses: cloudflare/wrangler-action@v3.7.0
+        uses: cloudflare/wrangler-action@v3.14.1
         with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          apiToken: ${{ inputs.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ inputs.CLOUDFLARE_ACCOUNT_ID }}
           command: "deploy"
-          wranglerVersion: "3.77.0"
+          wranglerVersion: "4.16.1"
