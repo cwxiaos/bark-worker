@@ -40,6 +40,7 @@ jobs:
           echo "Verifying Cloudflare API Token..."
           wrangler whoami
         env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ inputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
           
       - name: Check and Create D1 Database
@@ -47,17 +48,18 @@ jobs:
           set -x
           DB_LIST=$(wrangler d1 list --json)
           DB_ID=$(echo $DB_LIST | jq -r '.[] | select(.name == "database-bark") | .uuid')
-
+      
           if [ -z "$DB_ID" ]; then
             CREATE_OUTPUT=$(wrangler d1 create database-bark)
-            DB_ID=$(echo "$CREATE_OUTPUT" | sed -n 's/.*database_id = "\([^"]*\)".*/\1/p')
+            DB_ID=$(echo "$CREATE_OUTPUT" | sed -n 's/.*"database_id": "\([a-f0-9-]*\)".*/\1/p')
           else
             echo "Found existing database-bark database"
           fi
-
+      
           echo "Database ID: $DB_ID"
           echo "DB_ID=$DB_ID" >> $GITHUB_ENV
         env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ inputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
 
       - name: Update wrangler.toml
