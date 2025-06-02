@@ -10,7 +10,7 @@
         "categories": [],
         "icon_urls": [],
         "docs_url": "https://developers.cloudflare.com/workers/",
-        "preview_image_url": "",
+        "preview_image_url": "https://github.com/cwxiaos/bark-worker/blob/master/doc/images/bark.jpeg",
         "dash": true
     },
     "devDependencies": {

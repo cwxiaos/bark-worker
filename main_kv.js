@@ -10,7 +10,7 @@ const isAllowNewDevice = true
 const isAllowQueryNums = true
 // 根路径
 const rootPath = '/'
-// Basic Auth username:password
+// BasicAuth username:password
 const basicAuth = ''
 
 async function handleRequest(request, env, ctx) {
@@ -31,12 +31,12 @@ async function handleRequest(request, env, ctx) {
         case "/info": {
             if (!util.validateBasicAuth(request)) {
                 return new Response('Unauthorized', {
-                        status: 401,
-                        headers: {
-                            'content-type': 'text/plain',
-                            'WWW-Authenticate': 'Basic',
-                        }
-                    })
+                    status: 401,
+                    headers: {
+                        'content-type': 'text/plain',
+                        'WWW-Authenticate': 'Basic',
+                    }
+                })
             }
 
             return handler.info(searchParams)
@@ -89,6 +89,7 @@ async function handleRequest(request, env, ctx) {
                             })
                         }
                     }
+
                     if (requestBody.device_keys && typeof requestBody.device_keys === 'string') {
                         if (requestBody.device_keys.startsWith('[') || requestBody.device_keys.endsWith(']')) {
                             requestBody.device_keys = JSON.parse(requestBody.device_keys)
@@ -120,8 +121,8 @@ async function handleRequest(request, env, ctx) {
                         'data': await Promise.all(requestBody.device_keys.map(async (device_key) => {
                             if (!device_key) {
                                 return {
-                                    message: 'device key is empty',
                                     code: 400,
+                                    message: 'device key is empty',
                                     device_key: device_key,
                                 }
                             }
@@ -129,8 +130,8 @@ async function handleRequest(request, env, ctx) {
                             const response = await handler.push({...requestBody, device_key})
                             const responseBody = await response.json()
                             return {
-                                message: responseBody.message,
                                 code: response.status,
+                                message: responseBody.message,
                                 device_key: device_key,
                             }
                         })),
@@ -177,15 +178,12 @@ async function handleRequest(request, env, ctx) {
     }
 }
 
-/**
- * Class Handler
- */
 class Handler {
     constructor(env) {
         this.version = "v2.1.6"
-        this.build = "2025-05-27 21:01:41"
+        this.build = "2025-06-02 08:22:37"
         this.arch = "js"
-        this.commit = "afaa6307537ccd15e2e6cc63d97239041eaae8e6"
+        this.commit = "ceae18c6252ccbf63113fa2faa45a7e77627f2eb"
 
         const db = new Database(env)
 
@@ -256,6 +254,7 @@ class Handler {
 
         this.healthz = async (parameters) => {
             return new Response("ok", {
+                status: 200,
                 headers: {
                     'content-type': 'text/plain',
                 }
@@ -442,9 +441,6 @@ class Handler {
     }
 }
 
-/**
- * Class APNs
- */
 class APNs {
     constructor(db) {
         const generateAuthToken = async () => {
@@ -481,11 +477,14 @@ class APNs {
 
         const getAuthToken = async () => {
             let authToken = await db.authorizationToken()
+
             if (authToken) {
                 return await authToken
             }
+
             authToken = await generateAuthToken()
             await db.saveAuthorizationToken(authToken, util.getTimestamp())
+
             return authToken
         }
 
@@ -510,9 +509,6 @@ class APNs {
     }
 }
 
-/**
- * Class Database
- */
 class Database {
     constructor(env) {
         // Make database private
@@ -546,9 +542,6 @@ class Database {
     }
 }
 
-/**
- * Class Util
- */
 class Util {
     constructor() {
         this.getTimestamp = () => {
