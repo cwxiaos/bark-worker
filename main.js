@@ -181,7 +181,7 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.6"
-        this.build = "2025-06-12 18:53:3"
+        this.build = "2025-06-12 18:53:37"
         this.arch = "js"
         this.commit = "a7d670448c33cc42ebee558e4db3444e9d69aa7c"
 
