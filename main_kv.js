@@ -181,9 +181,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.1.6"
-        this.build = "2025-06-02 08:22:37"
+        this.build = "2025-06-12 18:53:37"
         this.arch = "js"
-        this.commit = "ceae18c6252ccbf63113fa2faa45a7e77627f2eb"
+        this.commit = "a7d670448c33cc42ebee558e4db3444e9d69aa7c"
 
         const db = new Database(env)
 
@@ -347,6 +347,7 @@ class Handler {
             const level = parameters.level || undefined
             const volume = parameters.volume || undefined
             const url = parameters.url || undefined
+            const image = parameters.image || undefined
             const copy = parameters.copy || undefined
             const badge = parameters.badge || undefined
             const autoCopy = parameters.autoCopy || undefined
@@ -400,6 +401,7 @@ class Handler {
                 'autocopy': autoCopy,
                 'action': action,
                 'iv': iv,
+                'image': image,
             }
 
             const apns = new APNs(db)
