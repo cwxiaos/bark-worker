@@ -181,9 +181,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.2.5"
-        this.build = "2025-07-28 23:37:11"
+        this.build = "2025-07-28 23:59:41"
         this.arch = "js"
-        this.commit = "94c9c351ffb01d2f80f7d2b47bce9e67ddf3b989"
+        this.commit = "a2a278aec532a41bf023276d4e7cde6924f5dc8d"
 
         const db = new Database(env)
 
@@ -354,14 +354,14 @@ class Handler {
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
-                'aps': (_delete) && {
+                'aps': (_delete) ? {
                     'content-available': 1,
                     'mutable-content': 1,
-                } || {
+                } : {
                     'alert': {
                         'title': title,
                         'subtitle': subtitle,
-                        'body': (!title && !subtitle && !body) && 'Empty Message' || body,
+                        'body': (!title && !subtitle && !body) ? 'Empty Message' : body,
                         'launch-image': undefined,
                         'title-loc-key': undefined,
                         'title-loc-args': undefined,
@@ -413,7 +413,7 @@ class Handler {
                 'apns-collapse-id': id,
                 'apns-priority': undefined,
                 'apns-expiration': undefined,
-                'apns-push-type': (_delete) && 'background' || 'alert',
+                'apns-push-type': (_delete) ? 'background' : 'alert',
             }
 
             const apns = new APNs(db)
@@ -513,7 +513,7 @@ class APNs {
                     'apns-topic': headers['apns-topic'] || TOPIC,
                     'apns-id': headers['apns-id'] || undefined,
                     'apns-collapse-id': headers['apns-collapse-id'] || undefined,
-                    'apns-priority': (headers['apns-priority'] > 0) && headers['apns-priority'] || undefined,
+                    'apns-priority': (headers['apns-priority'] > 0) ? headers['apns-priority'] : undefined,
                     'apns-expiration': util.getTimestamp() + 86400,
                     'apns-push-type': headers['apns-push-type'] || 'alert',
                     'authorization': `bearer ${AUTHENTICATION_TOKEN}`,
