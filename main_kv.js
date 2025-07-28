@@ -180,10 +180,10 @@ async function handleRequest(request, env, ctx) {
 
 class Handler {
     constructor(env) {
-        this.version = "v2.1.6"
-        this.build = "2025-06-12 18:53:37"
+        this.version = "v2.2.5"
+        this.build = "2025-07-28 23:37:11"
         this.arch = "js"
-        this.commit = "a7d670448c33cc42ebee558e4db3444e9d69aa7c"
+        this.commit = "94c9c351ffb01d2f80f7d2b47bce9e67ddf3b989"
 
         const db = new Database(env)
 
@@ -325,10 +325,6 @@ class Handler {
                 })
             }
 
-            if (!title && !subtitle && !body) {
-                body = 'Empty message'
-            }
-
             let sound = parameters.sound || undefined
             if (sound) {
                 if (!sound.endsWith('.caf')) {
@@ -353,14 +349,19 @@ class Handler {
             const autoCopy = parameters.autoCopy || undefined
             const action = parameters.action || undefined
             const iv = parameters.iv || undefined
+            const id = parameters.id || undefined
+            const _delete = parameters.delete || undefined
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
-                'aps': {
+                'aps': (_delete) && {
+                    'content-available': 1,
+                    'mutable-content': 1,
+                } || {
                     'alert': {
                         'title': title,
                         'subtitle': subtitle,
-                        'body': body,
+                        'body': (!title && !subtitle && !body) && 'Empty Message' || body,
                         'launch-image': undefined,
                         'title-loc-key': undefined,
                         'title-loc-args': undefined,
@@ -402,10 +403,21 @@ class Handler {
                 'action': action,
                 'iv': iv,
                 'image': image,
+                'id': id,
+                'delete': _delete,
+            }
+
+            const headers = {
+                'apns-topic': undefined,
+                'apns-id': undefined,
+                'apns-collapse-id': id,
+                'apns-priority': undefined,
+                'apns-expiration': undefined,
+                'apns-push-type': (_delete) && 'background' || 'alert',
             }
 
             const apns = new APNs(db)
-            const response = await apns.push(deviceToken, aps)
+            const response = await apns.push(deviceToken, headers, aps)
 
             if (response.status === 200) {
                 return new Response(JSON.stringify({
@@ -490,22 +502,24 @@ class APNs {
             return authToken
         }
 
-        this.push = async (deviceToken, aps) => {
+        this.push = async (deviceToken, headers, aps) => {
             const TOPIC = 'me.fin.bark'
             const APNS_HOST_NAME = 'api.push.apple.com'
             const AUTHENTICATION_TOKEN = await getAuthToken()
-            const pushData = JSON.stringify(aps)
 
             return await fetch(`https://${APNS_HOST_NAME}/3/device/${deviceToken}`, {
                 method: 'POST',
-                headers: {
-                    'apns-topic': TOPIC,
+                headers: JSON.parse(JSON.stringify({
+                    'apns-topic': headers['apns-topic'] || TOPIC,
+                    'apns-id': headers['apns-id'] || undefined,
+                    'apns-collapse-id': headers['apns-collapse-id'] || undefined,
+                    'apns-priority': (headers['apns-priority'] > 0) && headers['apns-priority'] || undefined,
                     'apns-expiration': util.getTimestamp() + 86400,
-                    'apns-push-type': 'alert',
+                    'apns-push-type': headers['apns-push-type'] || 'alert',
                     'authorization': `bearer ${AUTHENTICATION_TOKEN}`,
                     'content-type': 'application/json',
-                },
-                body: pushData,
+                })),
+                body: JSON.stringify(aps),
             })
         }
     }
