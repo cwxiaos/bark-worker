@@ -181,9 +181,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env) {
         this.version = "v2.2.5"
-        this.build = "2025-07-28 23:59:41"
+        this.build = "2025-09-20 16:01:13"
         this.arch = "js"
-        this.commit = "a2a278aec532a41bf023276d4e7cde6924f5dc8d"
+        this.commit = "ea5f35bb9a823524653f20548ea9d5f22b746b0d"
 
         const db = new Database(env)
 
@@ -283,10 +283,23 @@ class Handler {
         this.push = async (parameters) => {
             const deviceToken = await db.deviceTokenByKey(parameters.device_key)
 
-            if (!deviceToken) {
+            if (deviceToken === undefined) {
                 return new Response(JSON.stringify({
                     'code': 400,
                     'message': `failed to get device token: failed to get [${parameters.device_key}] device token from database`,
+                    'timestamp': util.getTimestamp(),
+                }), {
+                    status: 400,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
+            }
+
+            if (!deviceToken) {
+                return new Response(JSON.stringify({
+                    'code': 400,
+                    'message': 'device token invalid',
                     'timestamp': util.getTimestamp(),
                 }), {
                     status: 400,
@@ -440,6 +453,10 @@ class Handler {
                     message = responseText
                 }
 
+                if ((response.status === 410) || ((response.status === 400) && (message.includes('BadDeviceToken')))) {
+                    await db.saveDeviceTokenByKey(parameters.device_key, '')
+                }
+
                 return new Response(JSON.stringify({
                     'code': response.status,
                     'message': `push failed: ${message}`,
@@ -536,13 +553,13 @@ class Database {
         }
 
         this.deviceTokenByKey = async (key) => {
-            const device_key = (key || '').replace(/[^a-zA-Z0-9]/g, '') || "_PLACE_HOLDER_"
+            const device_key = (key || '').replace(/[^a-zA-Z0-9]/g, '') || '_PLACE_HOLDER_'
             const deviceToken = await kvStorage.get(device_key)
             return deviceToken
         }
 
         this.saveDeviceTokenByKey = async (key, token) => {
-            const device_token = (token || '').replace(/[^a-z0-9]/g, '') || "_PLACE_HOLDER_"
+            const device_token = (token || '').replace(/[^a-z0-9]/g, '') || ''
             const deviceToken = await kvStorage.put(key, device_token)
             return await deviceToken
         }
@@ -576,7 +593,7 @@ class Util {
 
         this.newShortUUID = async () => {
             const uuid = crypto.randomUUID()
-            const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(uuid))
+            const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(uuid))
             const hashArray = Array.from(new Uint8Array(hashBuffer))
 
             return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 22)
