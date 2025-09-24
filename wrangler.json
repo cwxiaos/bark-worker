@@ -14,5 +14,10 @@
             "database_name": "database-bark",
             "database_id": "<unique-ID-for-your-database>"
         }
-    ]
+    ],
+    "vars": {
+        "ALLOW_NEW_DEVICE": "true",
+        "ALLOW_QUERY_NUMS": "true",
+        "ROOT_PATH": "/"
+    }
 }
