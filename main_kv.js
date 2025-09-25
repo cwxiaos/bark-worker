@@ -4,18 +4,14 @@ export default {
     }
 }
 
-// 是否允许新建设备
-const isAllowNewDevice = true
-// 是否允许查询设备数量
-const isAllowQueryNums = true
-// 根路径
-const rootPath = '/'
-// BasicAuth username:password
-const basicAuth = ''
-
 async function handleRequest(request, env, ctx) {
+    const allowNewDevice = env.ALLOW_NEW_DEVICE !== undefined ? (env.ALLOW_NEW_DEVICE === 'false' ? false : Boolean(env.ALLOW_NEW_DEVICE)) : true
+    const allowQueryNums = env.ALLOW_QUERY_NUMS !== undefined ? (env.ALLOW_QUERY_NUMS === 'false' ? false : Boolean(env.ALLOW_QUERY_NUMS)) : true
+    const rootPath = env.ROOT_PATH || '/'
+    const basicAuth = env.BASIC_AUTH
+
     const {searchParams, pathname} = new URL(request.url)
-    const handler = new Handler(env)
+    const handler = new Handler(env, { allowNewDevice, allowQueryNums })
     const realPathname = pathname.replace((new RegExp('^' + rootPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"))), '/')
 
     switch (realPathname) {
@@ -29,7 +25,7 @@ async function handleRequest(request, env, ctx) {
             return handler.healthz(searchParams)
         }
         case "/info": {
-            if (!util.validateBasicAuth(request)) {
+            if (!util.validateBasicAuth(request, basicAuth)) {
                 return new Response('Unauthorized', {
                     status: 401,
                     headers: {
@@ -38,14 +34,12 @@ async function handleRequest(request, env, ctx) {
                     }
                 })
             }
-
             return handler.info(searchParams)
         }
         default: {
             const pathParts = realPathname.split('/')
-
             if (pathParts[1]) {
-                if (!util.validateBasicAuth(request)) {
+                if (!util.validateBasicAuth(request, basicAuth)) {
                     return new Response('Unauthorized', {
                         status: 401,
                         headers: {
@@ -54,7 +48,6 @@ async function handleRequest(request, env, ctx) {
                         }
                     })
                 }
-
                 const contentType = request.headers.get('content-type')
                 let requestBody = {}
 
@@ -179,12 +172,13 @@ async function handleRequest(request, env, ctx) {
 }
 
 class Handler {
-    constructor(env) {
+    constructor(env, options) {
         this.version = "v2.2.5"
         this.build = "2025-09-20 16:01:13"
         this.arch = "js"
         this.commit = "ea5f35bb9a823524653f20548ea9d5f22b746b0d"
-
+        this.allowNewDevice = options.allowNewDevice
+        this.allowQueryNums = options.allowQueryNums
         const db = new Database(env)
 
         this.register = async (parameters) => {
@@ -205,7 +199,7 @@ class Handler {
             }
 
             if (!(key && await db.deviceTokenByKey(key))){
-                if (isAllowNewDevice) {
+                if (this.allowNewDevice) {
                     key = await util.newShortUUID()
                 } else {
                     return new Response(JSON.stringify({
@@ -262,7 +256,7 @@ class Handler {
         }
 
         this.info = async (parameters) => {
-            if (isAllowQueryNums) {
+            if (this.allowQueryNums) {
                 this.devices = await db.countAll()
             }
 
@@ -599,14 +593,25 @@ class Util {
             return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 22)
         }
 
-        this.validateBasicAuth = (request) => {
-            if (basicAuth) {
-                const header = 'Basic ' + btoa(`${basicAuth}`)
-                const authHeader = request.headers.get('Authorization')
-                return header === authHeader
+        this.constantTimeCompare = (a, b) => {
+            if (typeof a !== 'string' || typeof b !== 'string') return false;
+            if (a.length !== b.length) return false;
+            let result = 0;
+            for (let i = 0; i < a.length; i++) {
+                result |= a.charCodeAt(i) ^ b.charCodeAt(i);
             }
+            return result === 0;
+        };
 
-            return true
+        this.validateBasicAuth = (request, basicAuth) => {
+            if (basicAuth) {
+                const authHeader = request.headers.get('Authorization')
+                if (typeof authHeader !== 'string' || !authHeader.startsWith('Basic ')) return false;
+                const received = authHeader.slice(6); // 去掉 'Basic '
+                const expected = btoa(`${basicAuth}`);
+                return this.constantTimeCompare(received, expected);
+            }
+            return true;
         }
     }
 }
