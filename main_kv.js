@@ -38,6 +38,7 @@ async function handleRequest(request, env, ctx) {
         }
         default: {
             const pathParts = realPathname.split('/')
+
             if (pathParts[1]) {
                 if (!util.validateBasicAuth(request, basicAuth)) {
                     return new Response('Unauthorized', {
@@ -48,6 +49,7 @@ async function handleRequest(request, env, ctx) {
                         }
                     })
                 }
+
                 const contentType = request.headers.get('content-type')
                 let requestBody = {}
 
@@ -173,10 +175,10 @@ async function handleRequest(request, env, ctx) {
 
 class Handler {
     constructor(env, options) {
-        this.version = "v2.2.5"
-        this.build = "2025-09-20 16:01:13"
+        this.version = "v2.2.6"
+        this.build = "2025-10-12 11:09:07"
         this.arch = "js"
-        this.commit = "ea5f35bb9a823524653f20548ea9d5f22b746b0d"
+        this.commit = "1f091152e1ab2ca818f4ca3a1639d422d32057d2"
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
         const db = new Database(env)
@@ -198,13 +200,26 @@ class Handler {
                 })
             }
 
+            if (deviceToken.length > 128) {
+                return new Response(JSON.stringify({
+                    'code': 400,
+                    'message': 'device token is invalid',
+                    'timestamp': util.getTimestamp(),
+                }), {
+                    status: 400,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
+            }
+
             if (!(key && await db.deviceTokenByKey(key))){
                 if (this.allowNewDevice) {
                     key = await util.newShortUUID()
                 } else {
                     return new Response(JSON.stringify({
                         'code': 500,
-                        'message': "device registration failed: register disabled",
+                        'message': 'device registration failed: register disabled',
                     }), {
                         status: 500,
                         headers: {
@@ -294,6 +309,21 @@ class Handler {
                 return new Response(JSON.stringify({
                     'code': 400,
                     'message': 'device token invalid',
+                    'timestamp': util.getTimestamp(),
+                }), {
+                    status: 400,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
+            }
+
+            if (deviceToken.length > 128) {
+                await db.deleteDeviceByKey(parameters.device_key)
+
+                return new Response(JSON.stringify({
+                    'code': 400,
+                    'message': 'invalid device token, has been removed',
                     'timestamp': util.getTimestamp(),
                 }), {
                     status: 400,
@@ -558,6 +588,12 @@ class Database {
             return await deviceToken
         }
 
+        this.deleteDeviceByKey = async (key) => {
+            const device_key = (key || '').replace(/[^a-zA-Z0-9]/g, '') || '_PLACE_HOLDER_'
+            const deviceToken = await kvStorage.delete(device_key)
+            return await deviceToken
+        }
+
         this.saveAuthorizationToken = async (token) => {
             const authToken = await kvStorage.put('_authToken_', token, { expirationTtl: 3000 })
             return await authToken
@@ -593,25 +629,25 @@ class Util {
             return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 22)
         }
 
-        this.constantTimeCompare = (a, b) => {
-            if (typeof a !== 'string' || typeof b !== 'string') return false;
-            if (a.length !== b.length) return false;
-            let result = 0;
+        const constantTimeCompare = (a, b) => {
+            if (typeof a !== 'string' || typeof b !== 'string') { return false }
+            if (a.length !== b.length) { return false }
+            let result = 0
             for (let i = 0; i < a.length; i++) {
-                result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+                result |= a.charCodeAt(i) ^ b.charCodeAt(i)
             }
-            return result === 0;
-        };
+            return result === 0
+        }
 
         this.validateBasicAuth = (request, basicAuth) => {
             if (basicAuth) {
                 const authHeader = request.headers.get('Authorization')
-                if (typeof authHeader !== 'string' || !authHeader.startsWith('Basic ')) return false;
-                const received = authHeader.slice(6); // 去掉 'Basic '
-                const expected = btoa(`${basicAuth}`);
-                return this.constantTimeCompare(received, expected);
+                if (typeof authHeader !== 'string' || !authHeader.startsWith('Basic ')) { return false }
+                const received = authHeader.slice(6) // Remove 'Basic ' prefix
+                const expected = btoa(`${basicAuth}`)
+                return constantTimeCompare(received, expected)
             }
-            return true;
+            return true
         }
     }
 }
