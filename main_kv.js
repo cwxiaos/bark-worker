@@ -626,7 +626,7 @@ class Util {
             const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(uuid))
             const hashArray = Array.from(new Uint8Array(hashBuffer))
 
-            return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 22)
+            return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z2-9]/g, '').slice(0, 22)
         }
 
         const constantTimeCompare = (a, b) => {
