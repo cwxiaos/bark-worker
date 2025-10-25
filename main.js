@@ -176,9 +176,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(env, options) {
         this.version = "v2.2.6"
-        this.build = "2025-10-12 11:09:07"
+        this.build = "2025-10-25 21:09:29"
         this.arch = "js"
-        this.commit = "1f091152e1ab2ca818f4ca3a1639d422d32057d2"
+        this.commit = "a5d5365ad2dc362858b39044f05da9e10d3538cf"
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
         const db = new Database(env)
@@ -650,7 +650,7 @@ class Util {
             const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(uuid))
             const hashArray = Array.from(new Uint8Array(hashBuffer))
 
-            return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 22)
+            return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]|[lIO01]/g, '').slice(0, 22)
         }
 
         const constantTimeCompare = (a, b) => {
