@@ -31,7 +31,7 @@ async function handleRequest(request, env, ctx) {
                     status: 401,
                     headers: {
                         'content-type': 'text/plain',
-                        'WWW-Authenticate': 'Basic',
+                        'WWW-Authenticate': 'Basic realm="Bark"',
                     }
                 })
             }
