@@ -85,7 +85,7 @@ async function handleRequest(request, env, ctx) {
                         } catch (error) {
                             return new Response(JSON.stringify({
                                 'code': 500,
-                                'meaasge': `url path parse failed: ${error}`,
+                                'message': `url path parse failed: ${error}`,
                                 'timestamp': util.getTimestamp(),
                             }), {
                                 status: 500,
@@ -138,7 +138,7 @@ async function handleRequest(request, env, ctx) {
                         } catch (error) {
                             return new Response(JSON.stringify({
                                 'code': 500,
-                                'meaasge': `url path parse failed: ${error}`,
+                                'message': `url path parse failed: ${error}`,
                                 'timestamp': util.getTimestamp(),
                             }), {
                                 status: 500,
