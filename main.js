@@ -249,9 +249,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(db, options) {
         this.version = 'v2.2.6'
-        this.build = '2026-03-14 14:31:43'
+        this.build = '2026-03-14 14:39:26'
         this.arch = 'js'
-        this.commit = '1b015473c038b182169f35f36c25ec86ae343c1'
+        this.commit = 'ce6983b67fb779d793d361db1af5149a5105c656'
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
         
@@ -381,21 +381,6 @@ class Handler {
                 return new Response(JSON.stringify({
                     'code': 400,
                     'message': 'device token invalid',
-                    'timestamp': util.getTimestamp(),
-                }), {
-                    status: 400,
-                    headers: {
-                        'content-type': 'application/json',
-                    }
-                })
-            }
-
-            if (deviceToken.length > 160) {
-                await db.deleteDeviceByKey(parameters.device_key)
-
-                return new Response(JSON.stringify({
-                    'code': 400,
-                    'message': 'invalid device token, has been removed',
                     'timestamp': util.getTimestamp(),
                 }), {
                     status: 400,
