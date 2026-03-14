@@ -1,7 +1,7 @@
 {
     "name": "bark-worker",
     "main": "main.js",
-    "compatibility_date": "2025-03-01",
+    "compatibility_date": "2026-03-01",
     "compatibility_flags": [
         "nodejs_compat"
     ],
@@ -15,6 +15,7 @@
             "database_id": "<unique-ID-for-your-database>"
         }
     ],
+    "keep_vars": true,
     "vars": {
         "ALLOW_NEW_DEVICE": "true",
         "ALLOW_QUERY_NUMS": "true",
