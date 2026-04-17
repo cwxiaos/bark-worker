@@ -249,9 +249,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(db, options) {
         this.version = 'v2.2.6'
-        this.build = '2026-03-14 14:39:26'
+        this.build = '2026-04-17 10:45:09'
         this.arch = 'js'
-        this.commit = 'ce6983b67fb779d793d361db1af5149a5105c656'
+        this.commit = '485742943916b859a49085fd72cd4ffb419f6266'
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
         
