@@ -11,7 +11,9 @@ async function handleRequest(request, env, ctx) {
     const basicAuth = env.BASIC_AUTH
 
     const db = new Database(env)
-    const {searchParams, pathname} = new URL(request.url)
+    ctx.waitUntil(db.cleanupExpiredSessions())
+
+    const { searchParams, pathname } = new URL(request.url)
     const handler = new Handler(db, { allowNewDevice, allowQueryNums })
     const realPathname = pathname.replace((new RegExp('^' + rootPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'))), '/')
 
@@ -37,6 +39,18 @@ async function handleRequest(request, env, ctx) {
             }
             return handler.info(searchParams)
         }
+        case '/mcp': {
+            if (!util.validateBasicAuth(request, basicAuth)) {
+                return new Response('Unauthorized', {
+                    status: 401,
+                    headers: {
+                        'content-type': 'text/plain',
+                        'WWW-Authenticate': 'Basic realm="Bark"',
+                    }
+                })
+            }
+            return handler.mcp(request, undefined)
+        }
         default: {
             const pathParts = realPathname.split('/')
 
@@ -51,6 +65,10 @@ async function handleRequest(request, env, ctx) {
                     })
                 }
 
+                if (pathParts[1] === 'mcp') {
+                    return handler.mcp(request, pathParts[2])
+                }
+
                 const contentType = request.headers.get('content-type')
                 let requestBody = {}
 
@@ -62,25 +80,25 @@ async function handleRequest(request, env, ctx) {
                             obj[key.toLowerCase()] = requestBody[key]
                             return obj
                         }, {})
-                    }else if (contentType && contentType.includes('application/x-www-form-urlencoded')){
+                    } else if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
                         const formData = await request.formData()
-                        formData.forEach((value, key) => {requestBody[key.toLowerCase()] = value})
+                        formData.forEach((value, key) => { requestBody[key.toLowerCase()] = value })
 
                         try {
                             if (requestBody.title) {
-                                requestBody.title = decodeURIComponent(requestBody.title.replaceAll('\\+', '%20'))
+                                requestBody.title = decodeURIComponent(requestBody.title.replaceAll('\+', '%20'))
                             }
-                            
+
                             if (requestBody.subtitle) {
-                                requestBody.subtitle = decodeURIComponent(requestBody.subtitle.replaceAll('\\+', '%20'))
+                                requestBody.subtitle = decodeURIComponent(requestBody.subtitle.replaceAll('\+', '%20'))
                             }
-                            
+
                             if (requestBody.body) {
-                                requestBody.body = decodeURIComponent(requestBody.body.replaceAll('\\+', '%20'))
+                                requestBody.body = decodeURIComponent(requestBody.body.replaceAll('\+', '%20'))
                             }
 
                             if (requestBody.markdown) {
-                                requestBody.markdown = decodeURIComponent(requestBody.markdown.replaceAll('\\+', '%20'))
+                                requestBody.markdown = decodeURIComponent(requestBody.markdown.replaceAll('\+', '%20'))
                             }
                         } catch (error) {
                             return new Response(JSON.stringify({
@@ -94,8 +112,8 @@ async function handleRequest(request, env, ctx) {
                                 }
                             })
                         }
-                    }else{
-                        searchParams.forEach((value, key) => {requestBody[key.toLowerCase()] = value})
+                    } else {
+                        searchParams.forEach((value, key) => { requestBody[key.toLowerCase()] = value })
 
                         if (pathParts.length === 3) {
                             requestBody.body = pathParts[2]
@@ -121,19 +139,19 @@ async function handleRequest(request, env, ctx) {
 
                         try {
                             if (requestBody.title) {
-                                requestBody.title = decodeURIComponent(requestBody.title.replaceAll('\\+','%20'))
+                                requestBody.title = decodeURIComponent(requestBody.title.replaceAll('\+', '%20'))
                             }
-                            
+
                             if (requestBody.subtitle) {
-                                requestBody.subtitle = decodeURIComponent(requestBody.subtitle.replaceAll('\\+','%20'))
+                                requestBody.subtitle = decodeURIComponent(requestBody.subtitle.replaceAll('\+', '%20'))
                             }
-                            
+
                             if (requestBody.body) {
-                                requestBody.body = decodeURIComponent(requestBody.body.replaceAll('\\+','%20'))
+                                requestBody.body = decodeURIComponent(requestBody.body.replaceAll('\+', '%20'))
                             }
 
                             if (requestBody.markdown) {
-                                requestBody.markdown = decodeURIComponent(requestBody.markdown.replaceAll('\\+','%20'))
+                                requestBody.markdown = decodeURIComponent(requestBody.markdown.replaceAll('\+', '%20'))
                             }
                         } catch (error) {
                             return new Response(JSON.stringify({
@@ -186,7 +204,7 @@ async function handleRequest(request, env, ctx) {
                                 }
                             }
 
-                            const response = await handler.push({...requestBody, device_key})
+                            const response = await handler.push({ ...requestBody, device_key })
                             const responseBody = await response.json()
                             return {
                                 code: response.status,
@@ -248,13 +266,13 @@ async function handleRequest(request, env, ctx) {
 
 class Handler {
     constructor(db, options) {
-        this.version = 'v2.2.6'
-        this.build = '2026-04-17 10:45:09'
+        this.version = 'v2.3.3'
+        this.build = '2026-04-23 16:05:22'
         this.arch = 'js'
-        this.commit = '485742943916b859a49085fd72cd4ffb419f6266'
+        this.commit = 'f57119ce8a374cf04777f28e105e72fba384475b'
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
-        
+
         this.register = async (parameters) => {
             const deviceToken = parameters.get('devicetoken')
             let key = parameters.get('key')
@@ -285,7 +303,7 @@ class Handler {
                 })
             }
 
-            if (!(key && await db.deviceTokenByKey(key))){
+            if (!(key && await db.deviceTokenByKey(key))) {
                 if (this.allowNewDevice) {
                     key = await util.newShortUUID()
                 } else {
@@ -420,7 +438,7 @@ class Handler {
             const id = parameters.id || undefined
             const _delete = parameters.delete || undefined
             const markdown = parameters.markdown || undefined
-            
+
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
                 'aps': (_delete) ? {
@@ -503,7 +521,7 @@ class Handler {
             } else {
                 let message
                 const responseText = await response.text()
-                
+
                 try {
                     message = JSON.parse(responseText).reason
                 } catch (err) {
@@ -524,6 +542,307 @@ class Handler {
                         'content-type': 'application/json',
                     }
                 })
+            }
+        }
+
+        this.mcp = async (request, deviceKey) => {
+            if (request.method === 'DELETE') {
+                const sessionId = request.headers.get('mcp-session-id')
+                if (sessionId) {
+                    await db.deleteSessionBySessionID(sessionId)
+                }
+                return new Response(null, {
+                    status: 204
+                })
+            }
+
+            if (request.method !== 'POST') {
+                return new Response(JSON.stringify({
+                    'jsonrpc': '2.0',
+                    'id': null,
+                    'error': {
+                        'code': -32700,
+                        'message': 'Method not allowed',
+                    }
+                }), {
+                    status: 200,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
+            }
+
+            let body = {}
+            try {
+                body = await request.json()
+            } catch (err) {
+                return new Response(JSON.stringify({
+                    'jsonrpc': '2.0',
+                    'id': null,
+                    'error': {
+                        'code': -32700,
+                        'message': 'request body is not valid json',
+                    }
+                }), {
+                    status: 200,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
+            }
+
+            const {
+                jsonrpc,
+                id,
+                method,
+                params,
+            } = body
+
+            if (jsonrpc !== '2.0') {
+                return new Response(JSON.stringify({
+                    'jsonrpc': '2.0',
+                    'id': id || null,
+                    'error': {
+                        'code': -32600,
+                        'message': 'Invalid Request',
+                    }
+                }), {
+                    status: 200,
+                    headers: {
+                        'content-type': 'application/json',
+                    }
+                })
+            }
+
+            switch (method) {
+                case 'initialize': {
+                    const sessionId = await util.newMCPSessionUUID()
+                    await db.saveSessionBySessionID(sessionId, deviceKey, true, null)
+
+                    return new Response(JSON.stringify({
+                        'jsonrpc': '2.0',
+                        'id': id,
+                        'result': {
+                            'protocolVersion': '2025-03-26',
+                            'capabilities': {
+                                'tools': {
+                                    'listChanged': true,
+                                },
+                            },
+                            'serverInfo': {
+                                name: deviceKey ? 'Bark MCP Server (Specific)' : 'Bark MCP Server',
+                                version: this.version,
+                            },
+                        }
+                    }), {
+                        status: 200,
+                        headers: {
+                            'content-type': 'application/json',
+                            'mcp-session-id': sessionId,
+                        }
+                    })
+                }
+                case 'notifications/initialized': {
+                    const sessionId = request.headers.get('mcp-session-id')
+                    const session = await db.sessionBySessionID(sessionId)
+                    
+                    if (!session) {
+                        return new Response(null, {
+                            status: 400
+                        })
+                    }
+                    
+                    await db.saveSessionBySessionID(session.id, session.device_key, true, undefined)
+
+                    return new Response(null, {
+                        status: 202
+                    })
+                }
+                case 'tools/list': {
+                    const sessionId = request.headers.get('mcp-session-id')
+                    const session = await db.sessionBySessionID(sessionId)
+                    
+                    if (!session) {
+                        return new Response('Invalid session ID', {
+                            status: 400,
+                            headers: {
+                                'content-type': 'text/plain',
+                            }
+                        })
+                    }
+
+                    await db.saveSessionBySessionID(session.id, session.device_key, true, undefined)
+
+                    const sessionDeviceKey = session.device_key
+                    const required = sessionDeviceKey ? [] : ['device_key']
+
+                    const properties = {
+                        'title':        { 'type': 'string', 'description': 'Notification title' },
+                        'subtitle':     { 'type': 'string', 'description': 'Notification subtitle' },
+                        'body':         { 'type': 'string', 'description': 'Notification content' },
+                        'markdown':     { 'type': 'string', 'description': 'Markdown content, overrides body' },
+                        'level':        { 'type': 'string', 'description': 'Notification level', 'enum': ['critical', 'active', 'timeSensitive', 'passive'] },
+                        'volume':       { 'type': 'number', 'description': 'Alert volume (0–10)', 'minimum': 0, 'maximum': 10, 'default': 5 },
+                        'badge':        { 'type': 'number', 'description': 'Badge number' },
+                        'call':         { 'type': 'string', 'description': "Set to '1' to repeat ringtone" },
+                        'sound':        { 'type': 'string', 'description': 'Notification sound name' },
+                        'icon':         { 'type': 'string', 'description': 'Notification icon URL' },
+                        'image':        { 'type': 'string', 'description': 'Notification image URL' },
+                        'group':        { 'type': 'string', 'description': 'Notification group' },
+                        'isArchive':    { 'type': 'string', 'description': "Set to '1' to archive, other value to skip" },
+                        'url':          { 'type': 'string', 'description': 'Click action URL' },
+                        'copy':         { 'type': 'string', 'description': 'Text to copy on copy action' },
+                        'device_key': sessionDeviceKey ? undefined : { 'type': 'string', 'description': 'Device key' },
+                    }
+
+                    return new Response(JSON.stringify({
+                        'jsonrpc': '2.0',
+                        'id': id,
+                        'result': {
+                            'tools': [
+                                {   
+                                    'annotations': {
+                                        'readOnlyHint': false,
+                                        'destructiveHint': true,
+                                        'idempotentHint': false,
+                                        'openWorldHint': true
+                                    },
+                                    'name': 'notify',
+                                    'description': 'Send a notification to a device via Bark',
+                                    'inputSchema': {
+                                        'type': 'object',
+                                        'properties': properties,
+                                        ...(required.length > 0 ? { required } : {})
+                                    },
+                                },
+                            ]
+                        }
+                    }), {
+                        status: 200,
+                        headers: {
+                            'content-type': 'application/json',
+                        }
+                    })
+                }
+                case 'tools/call': {
+                    const sessionId = request.headers.get('mcp-session-id')
+                    const session = await db.sessionBySessionID(sessionId)
+                    
+                    if (!session) {
+                        return new Response('Invalid session ID', {
+                            status: 400,
+                            headers: {
+                                'content-type': 'text/plain',
+                            }
+                        })
+                    }
+
+                    await db.saveSessionBySessionID(session.id, session.device_key, true, undefined)
+
+                    const { name, arguments: args = {} } = params || {}
+
+                    if (name !== 'notify') {
+                        return new Response(JSON.stringify({
+                            'jsonrpc': '2.0',
+                            'id': id,
+                            'error': {
+                                'code': -32602,
+                                'message': `tool '${name}' not found: tool not found`,
+                            }
+                        }), {
+                            status: 200,
+                            headers: {
+                                'content-type': 'application/json',
+                            }
+                        })
+                    }
+
+                    const _deviceKey = session.device_key || args.device_key || ''
+                    if (!_deviceKey) {
+                        return new Response(JSON.stringify({
+                            'jsonrpc': '2.0',
+                            'id': id,
+                            'result': {
+                                'content': [
+                                    {
+                                        'type': 'text',
+                                        'text': 'device_key is required',
+                                    }
+                                ],
+                                'isError': true,
+                            }
+                        }), {
+                            status: 200,
+                            headers: {
+                                'content-type': 'application/json',
+                            }
+                        })
+                    }
+                    
+                    const parameters = { ...args, 'device_key': _deviceKey }
+                    const pushParams = Object.keys(parameters).reduce((obj, key) => {
+                        obj[key.toLowerCase()] = parameters[key]
+                        return obj
+                    }, {})
+
+                    const response = await this.push(pushParams)
+                    const responseBody = await response.json()
+
+                    if (response.status === 200) {
+                        return new Response(JSON.stringify({
+                            'jsonrpc': '2.0',
+                            'id': id,
+                            'result': {
+                                'content': [
+                                    {
+                                        'type': 'text',
+                                        'text': 'Notification sent successfully',
+                                    }
+                                ]
+                            }
+                        }), {
+                            status: 200,
+                            headers: {
+                                'content-type': 'application/json',
+                            }
+                        })
+                    }
+
+                    return new Response(JSON.stringify({
+                        'jsonrpc': '2.0',
+                        'id': id,
+                        'result': {
+                            'content': [
+                                {
+                                    'type': 'text',
+                                    'text': `Failed to send notification: ${responseBody.message}`,
+                                }
+                            ],
+                            'isError': true,
+                        }
+                    }), {
+                        status: 200,
+                        headers: {
+                            'content-type': 'application/json',
+                        }
+                    })
+
+                }
+                default: {
+                    return new Response(JSON.stringify({
+                        'jsonrpc': '2.0',
+                        'id': id || null,
+                        'error': {
+                            'code': -32601,
+                            'message': `Method not found: ${method}`,
+                        }
+                    }), {
+                        status: 200,
+                        headers: {
+                            'content-type': 'application/json',
+                        }
+                    })
+                }
             }
         }
     }
@@ -605,12 +924,13 @@ class Database {
 
         db.exec('CREATE TABLE IF NOT EXISTS `devices` (`id` INTEGER PRIMARY KEY, `key` VARCHAR(255) NOT NULL, `token` VARCHAR(255) NOT NULL, UNIQUE (`key`))')
         db.exec('CREATE TABLE IF NOT EXISTS `authorization` (`id` INTEGER PRIMARY KEY, `token` VARCHAR(255) NOT NULL, `time` VARCHAR(255) NOT NULL)')
+        db.exec('CREATE TABLE IF NOT EXISTS `sessions` (`id` VARCHAR(64) PRIMARY KEY, `device_key` VARCHAR(255), `initialized` INTEGER DEFAULT 0, `created_at` INTEGER NOT NULL, `last_seen` INTEGER NOT NULL)')
 
         this.countAll = async () => {
             const query = 'SELECT COUNT(*) as rowCount FROM `devices`'
             const result = await db.prepare(query).run()
-            
-            return (result.results[0] || {'rowCount': -1}).rowCount
+
+            return (result.results[0] || { 'rowCount': -1 }).rowCount
         }
 
         this.deviceTokenByKey = async (key) => {
@@ -618,7 +938,7 @@ class Database {
             const query = 'SELECT `token` FROM `devices` WHERE `key` = ?'
             const result = await db.prepare(query).bind(device_key).run()
 
-            return (result.results[0] || {'token': undefined}).token
+            return (result.results[0] || { 'token': undefined }).token
         }
 
         this.saveDeviceTokenByKey = async (key, token) => {
@@ -638,7 +958,7 @@ class Database {
         }
 
         this.saveAuthorizationToken = async (token) => {
-            const query = 'INSERT INTO `authorization` (`id`, `token`, `time`) VALUES (1, ?, ?) ON CONFLICT(`id`) DO UPDATE SET `token` = EXCLUDED.`token`,`time`  = EXCLUDED.`time`'
+            const query = 'INSERT INTO `authorization` (`id`, `token`, `time`) VALUES (1, ?, ?) ON CONFLICT(`id`) DO UPDATE SET `token` = EXCLUDED.`token`,`time` = EXCLUDED.`time`'
             const result = await db.prepare(query).bind(token, util.getTimestamp()).run()
 
             return result
@@ -647,7 +967,7 @@ class Database {
         this.authorizationToken = async () => {
             const query = 'SELECT `token`, `time` FROM `authorization` WHERE `id` = 1'
             const result = await db.prepare(query).run()
-            
+
             if (result.results.length > 0) {
                 const tokenTime = parseInt(result.results[0].time)
                 const timeDifference = util.getTimestamp() - tokenTime
@@ -658,6 +978,34 @@ class Database {
             }
 
             return undefined
+        }
+
+        this.sessionBySessionID = async (sessionId) => {
+            const now = util.getTimestamp()
+            const query = 'SELECT `id`, `device_key`, `initialized` FROM `sessions` WHERE `id` = ? AND `last_seen` > ? AND `created_at` > ?'
+            const result = await db.prepare(query).bind(sessionId, now - 3600, now - 86400).run()
+
+            return result.results[0] || null
+        }
+
+        this.saveSessionBySessionID = async (sessionId, deviceKey, initialized, lastSeen) => {
+            const now = util.getTimestamp()
+            const query = 'INSERT INTO `sessions` (`id`, `device_key`, `initialized`, `created_at`, `last_seen`) VALUES (?, ?, ?, ?, ?) ON CONFLICT(`id`) DO UPDATE SET `initialized` = EXCLUDED.`initialized`, `last_seen` = EXCLUDED.`last_seen`'
+
+            return await db.prepare(query).bind(sessionId, deviceKey || null, initialized ? 1 : 0, now, lastSeen ?? now).run()
+        }
+
+        this.deleteSessionBySessionID = async (sessionId) => {
+            const query = 'DELETE FROM `sessions` WHERE `id` = ?'
+
+            return await db.prepare(query).bind(sessionId).run()
+        }
+
+        this.cleanupExpiredSessions = async () => {
+            const now = util.getTimestamp()
+
+            const query = 'DELETE FROM `sessions` WHERE `last_seen` < ? OR `created_at` < ?'
+            return await db.prepare(query).bind(now - 3600, now - 86400).run()
         }
     }
 }
@@ -684,6 +1032,12 @@ class Util {
             const hashArray = Array.from(new Uint8Array(hashBuffer))
 
             return btoa(String.fromCharCode(...hashArray)).replace(/[^a-zA-Z0-9]|[lIO01]/g, '').slice(0, 22)
+        }
+
+        this.newMCPSessionUUID = async () => {
+            const uuid = crypto.randomUUID()
+            
+            return `mcp-session-${uuid}`
         }
 
         const constantTimeCompare = (a, b) => {

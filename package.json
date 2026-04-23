@@ -14,7 +14,7 @@
         "dash": true
     },
     "devDependencies": {
-        "wrangler": "^4.13.0"
+        "wrangler": "^4.84.1"
     },
     "scripts": {
         "cf-typegen": "wrangler types",

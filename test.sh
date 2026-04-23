@@ -100,7 +100,7 @@ ciphertext=$(echo -n $json | openssl enc -aes-128-cbc -K $key -iv $iv | base64)
 echo $ciphertext
 
 # URL encoding the ciphertext, there may be special characters.
-curl --data-urlencode "ciphertext=$ciphertext" $SERVER_ADDRESS/$DEVICE_KEY?isArchive=0
+curl --data-urlencode "ciphertext=$ciphertext" "$SERVER_ADDRESS/$DEVICE_KEY?isArchive=0"
 
 echo -e "\e[1;32m"
 echo ""
@@ -241,5 +241,185 @@ curl -X "POST" "$SERVER_ADDRESS/push" \
   "isArchive": "0",
   "device_keys": ["", "", ""]
 }'
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
+echo "Test MCP Generic Endpoint (/mcp) [Go/mcp-go stateful session]"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+MCP_URL="$SERVER_ADDRESS/mcp"
+MCP_SPECIFIC_URL="$SERVER_ADDRESS/mcp/$DEVICE_KEY"
+
+echo "--- initialize (capture Mcp-Session-Id) ---"
+INIT_RESPONSE=$(curl -s -D - -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{}}}')
+echo "$INIT_RESPONSE"
+
+SESSION_ID=$(echo "$INIT_RESPONSE" | grep -i 'Mcp-Session-Id' | awk '{print $2}' | tr -d '\r')
+echo ""
+echo "Session ID: $SESSION_ID"
+
+echo ""
+echo "--- notifications/initialized (with session, expect 204) ---"
+curl -s -o /dev/null -w "HTTP %{http_code}" -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID" \
+     -d '{"jsonrpc":"2.0","id":null,"method":"notifications/initialized"}'
+
+echo ""
+echo "--- tools/list (device_key should be required) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID" \
+     -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+
+echo ""
+echo "--- tools/call notify (device_key in args) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID" \
+     -d '{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "notify",
+    "arguments": {
+      "device_key": "'"$DEVICE_KEY"'",
+      "title": "MCP Generic Test",
+      "body": "Sent via /mcp with device_key in args",
+      "group": "mcp-test"
+    }
+  }
+}'
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
+echo "Test MCP Specific Endpoint (/mcp/:device_key)"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+echo "--- initialize (capture Mcp-Session-Id) ---"
+INIT_SPECIFIC_RESPONSE=$(curl -s -D - -X POST "$MCP_SPECIFIC_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{}}}')
+echo "$INIT_SPECIFIC_RESPONSE"
+
+SESSION_ID_SPECIFIC=$(echo "$INIT_SPECIFIC_RESPONSE" | grep -i 'Mcp-Session-Id' | awk '{print $2}' | tr -d '\r')
+echo ""
+echo "Session ID: $SESSION_ID_SPECIFIC"
+
+echo ""
+echo "--- tools/list (device_key should NOT be required) ---"
+curl -s -X POST "$MCP_SPECIFIC_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID_SPECIFIC" \
+     -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+
+echo ""
+echo "--- tools/call notify (device_key from URL) ---"
+curl -s -X POST "$MCP_SPECIFIC_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID_SPECIFIC" \
+     -d '{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "notify",
+    "arguments": {
+      "title": "MCP Specific Test",
+      "body": "Sent via /mcp/:device_key, no device_key in args",
+      "group": "mcp-test"
+    }
+  }
+}'
+
+echo -e "\e[1;32m"
+echo ""
+echo "---------------------------------------------------------------------"
+echo "Test MCP Error Cases"
+echo "---------------------------------------------------------------------"
+echo ""
+echo -e "\e[0m"
+
+echo "--- Invalid JSON body (expect parse error, no session needed) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -d 'not json'
+
+echo ""
+echo "--- Request without session ID (expect Invalid session ID) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":5,"method":"tools/list"}'
+
+echo ""
+echo "--- tools/call unknown tool name (expect error) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID" \
+     -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"no_such_tool","arguments":{}}}'
+
+echo ""
+echo "--- tools/call missing device_key on generic endpoint (expect isError) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID" \
+     -d '{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": {
+    "name": "notify",
+    "arguments": {
+      "body": "No device_key provided"
+    }
+  }
+}'
+
+echo ""
+echo "--- tools/call bad device_key (expect isError from APNs) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: $SESSION_ID" \
+     -d '{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "method": "tools/call",
+  "params": {
+    "name": "notify",
+    "arguments": {
+      "device_key": "'"$BAD_DEVICE_KEY"'",
+      "body": "Bad device key test"
+    }
+  }
+}'
+
+echo ""
+echo "--- Stale/invalid session ID (expect session error) ---"
+curl -s -X POST "$MCP_URL" \
+     -u admin:admin \
+     -H 'Content-Type: application/json' \
+     -H "Mcp-Session-Id: invalid-session-id-000" \
+     -d '{"jsonrpc":"2.0","id":9,"method":"tools/list"}'
 
 echo ""
