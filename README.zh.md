@@ -13,7 +13,7 @@
 > Device token可能发生变化, 之前使用多Key或Key别名的方法可能会失效, 如有多Key使用需要参考[Tips](doc/tips.zh.md). -->
 
 > [!NOTE]
-> KV版本由于数据库配额较低, 可能不会添加MCP支持, 但如果MCP的代码能够优化到一定程度, 可能会有NCP支持.
+> KV版本由于数据库配额较低, 可能不会添加MCP支持, 但如果MCP的代码能够优化到一定程度, 可能会有MCP支持.
 
 > [!NOTE]
 > 批量推送有最高优先级, 如果指定了`device_keys`且不为空, `device_key`将被忽略.

@@ -13,7 +13,7 @@ English | **[中文文档](README.zh.md)**
 > Device token may change, the previous way to use multi-key or key alias may be unavailable, refer to [Tips](doc/tips.md) for more details. -->
 
 > [!NOTE]
-> KV Version will probably not support MCP due to limited quota, but if the MCP route can be optimized to some extent, theer may have MCP support in KV version.
+> KV Version will probably not support MCP due to limited quota, but if the MCP route can be optimized to some extent, there may have MCP support in KV version.
 
 > [!NOTE]
 > Batch Push has the highest priority, if `device_keys` is specified and not empty, `device_key` will be ignored, in both V1 and V2 APIs.
