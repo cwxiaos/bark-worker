@@ -267,9 +267,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(db, options) {
         this.version = 'v2.3.3'
-        this.build = '2026-04-23 16:05:22'
+        this.build = '2026-04-23 16:27:55'
         this.arch = 'js'
-        this.commit = 'f57119ce8a374cf04777f28e105e72fba384475b'
+        this.commit = 'd4c12b850e98678882041ff0695b2ca476ff46de'
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
 
@@ -552,7 +552,7 @@ class Handler {
                     await db.deleteSessionBySessionID(sessionId)
                 }
                 return new Response(null, {
-                    status: 204
+                    status: 200
                 })
             }
 
