@@ -20,6 +20,6 @@
         "ALLOW_NEW_DEVICE": "true",
         "ALLOW_QUERY_NUMS": "true",
         "ROOT_PATH": "/",
-        "BASIC_AUTH": ""
+        // "BASIC_AUTH": ""
     }
 }
