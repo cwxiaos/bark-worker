@@ -267,9 +267,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(db, options) {
         this.version = 'v2.3.3'
-        this.build = '2026-04-23 16:27:55'
+        this.build = '2026-06-04 10:02:45'
         this.arch = 'js'
-        this.commit = 'd4c12b850e98678882041ff0695b2ca476ff46de'
+        this.commit = '8bfd70c369b6dba3dbe53aad96d79a4367f57a45'
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
 
@@ -438,6 +438,7 @@ class Handler {
             const id = parameters.id || undefined
             const _delete = parameters.delete || undefined
             const markdown = parameters.markdown || undefined
+            const ttl = parameters.ttl || undefined
 
             // https://developer.apple.com/documentation/usernotifications/generating-a-remote-notification
             const aps = {
@@ -493,6 +494,7 @@ class Handler {
                 'id': id,
                 'delete': _delete,
                 'markdown': markdown,
+                'ttl': ttl,
             }
 
             const headers = {
@@ -690,6 +692,7 @@ class Handler {
                         'image':        { 'type': 'string', 'description': 'Notification image URL' },
                         'group':        { 'type': 'string', 'description': 'Notification group' },
                         'isArchive':    { 'type': 'string', 'description': "Set to '1' to archive, other value to skip" },
+                        'ttl':          { 'type': 'number', 'description': 'Time to live in seconds for archived messages; expired items are automatically deleted' },
                         'url':          { 'type': 'string', 'description': 'Click action URL' },
                         'copy':         { 'type': 'string', 'description': 'Text to copy on copy action' },
                         'device_key': sessionDeviceKey ? undefined : { 'type': 'string', 'description': 'Device key' },
