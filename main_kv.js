@@ -249,9 +249,9 @@ async function handleRequest(request, env, ctx) {
 class Handler {
     constructor(db, options) {
         this.version = 'v2.2.6'
-        this.build = '2026-06-04 10:02:45'
+        this.build = '2026-07-14 11:28:28'
         this.arch = 'js'
-        this.commit = '8bfd70c369b6dba3dbe53aad96d79a4367f57a45'
+        this.commit = '3d79c533282d2a1f054523255662835c26957898'
         this.allowNewDevice = options.allowNewDevice
         this.allowQueryNums = options.allowQueryNums
         
@@ -413,7 +413,7 @@ class Handler {
             const url = parameters.url || undefined
             const image = parameters.image || undefined
             const copy = parameters.copy || undefined
-            const badge = parameters.badge || undefined
+            const badge = parameters.badge?.toString()
             const autoCopy = parameters.autocopy || undefined
             const action = parameters.action || undefined
             const iv = parameters.iv || undefined
