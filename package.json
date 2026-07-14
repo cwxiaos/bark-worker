@@ -1,6 +1,7 @@
 {
     "name": "bark-worker",
     "description": "Bark Server on Cloudflare Worker",
+    "type": "module",
     "cloudflare": {
         "label": "Bark Server",
         "products": [
@@ -17,6 +18,7 @@
         "wrangler": "^4.84.1"
     },
     "scripts": {
+        "test": "node --test",
         "cf-typegen": "wrangler types",
         "db:migrate": "wrangler d1 migrations apply database --local",
         "db:migrate:remote": "wrangler d1 migrations apply database --remote",

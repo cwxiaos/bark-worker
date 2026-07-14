@@ -431,7 +431,7 @@ class Handler {
             const url = parameters.url || undefined
             const image = parameters.image || undefined
             const copy = parameters.copy || undefined
-            const badge = parameters.badge || undefined
+            const badge = parameters.badge === null || parameters.badge === undefined ? undefined : String(parameters.badge)
             const autoCopy = parameters.autocopy || undefined
             const action = parameters.action || undefined
             const iv = parameters.iv || undefined
